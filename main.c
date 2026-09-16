@@ -34,7 +34,7 @@ typedef struct {
     int difficulty;
 } LeaderboardEntry;
 
-static bool MenuButton(Rectangle bounds, const char *label)
+static bool menu_button(Rectangle bounds, const char *label)
 {
     Vector2 mouse = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mouse, bounds);
@@ -105,9 +105,24 @@ static void SaveLeaderboard(LeaderboardEntry entries[], int *count,const char *n
 
 static const char *DifficultyName(int difficulty)
 {
-    if (difficulty == 0) return "Easy";
-    if (difficulty == 2) return "Hard";
+    if (difficulty == 0)
+    return "Easy";
+    if (difficulty == 2)
+    return "Hard";
+
     return "Normal";
+}
+
+/* Returns true when value can be safely snapped to a maze tile line. */
+static bool near_tile_line(float value, float origin, float tolerance)
+{
+    float line = origin + roundf((value - origin) / 26.0f) * 26.0f;
+    return fabsf(value - line) <= tolerance;
+}
+
+static float nearest_tile_line(float value, float origin)
+{
+    return origin + roundf((value - origin) / 26.0f) * 26.0f;
 }
 
 
@@ -248,20 +263,20 @@ int main(){
         if (menu_screen == MENU_MAIN) {
             DrawText("Main Menu", 830, 190, 34, RAYWHITE);
 
-            if (MenuButton((Rectangle){ 760, 255, 380, 60 }, "Play")) {
+            if (menu_button((Rectangle){ 760, 255, 380, 60 }, "Play")) {
                 menu_screen = MENU_NAME_INPUT;
             }
             
-            if (MenuButton((Rectangle){ 760, 330, 380, 60 }, "Leaderboard")) {
+            if (menu_button((Rectangle){ 760, 330, 380, 60 }, "Leaderboard")) {
                 menu_screen = MENU_LEADERBOARD;
             }
-            if (MenuButton((Rectangle){ 760, 405, 380, 60 }, "Game Rules")) {
+            if (menu_button((Rectangle){ 760, 405, 380, 60 }, "Game Rules")) {
                 menu_screen = MENU_RULES;
             }
-            if (MenuButton((Rectangle){ 760, 480, 380, 60 }, "About Us")) {
+            if (menu_button((Rectangle){ 760, 480, 380, 60 }, "About Us")) {
                 menu_screen = MENU_ABOUT;
             }
-            if (MenuButton((Rectangle){ 760, 555, 380, 60 }, "Quit")) {
+            if (menu_button((Rectangle){ 760, 555, 380, 60 }, "Quit")) {
                 EndDrawing();
                 CloseAudioDevice();
                 CloseWindow();
@@ -296,31 +311,31 @@ int main(){
         }
         else if (menu_screen == MENU_DIFFICULTY) {
             DrawText("Choose difficulty", 735, 220, 36, RAYWHITE);
-            if (MenuButton((Rectangle){ 760, 300, 380, 60 }, "Easy")) {
+            if (menu_button((Rectangle){ 760, 300, 380, 60 }, "Easy")) {
                 selected_difficulty = 0;
                 start_game = true;
             }
-            if (MenuButton((Rectangle){ 760, 380, 380, 60 }, "Normal")) {
+            if (menu_button((Rectangle){ 760, 380, 380, 60 }, "Normal")) {
                 selected_difficulty = 1;
                 start_game = true;
             }
-            if (MenuButton((Rectangle){ 760, 460, 380, 60 }, "Hard")) {
+            if (menu_button((Rectangle){ 760, 460, 380, 60 }, "Hard")) {
                 selected_difficulty = 2;
                 start_game = true;
             }
-            if (MenuButton((Rectangle){ 760, 560, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 560, 380, 60 }, "Back")) {
                 menu_screen = MENU_MAIN;
             }
         }
         else if (menu_screen == MENU_LEADERBOARD) {
             DrawText("Leaderboard", 770, 185, 40, YELLOW);
-            if (MenuButton((Rectangle){ 590, 255, 210, 55 }, "Easy")) {
+            if (menu_button((Rectangle){ 590, 255, 210, 55 }, "Easy")) {
                 leaderboard_difficulty = 0;
             }
-            if (MenuButton((Rectangle){ 845, 255, 210, 55 }, "Normal")) {
+            if (menu_button((Rectangle){ 845, 255, 210, 55 }, "Normal")) {
                 leaderboard_difficulty = 1;
             }
-            if (MenuButton((Rectangle){ 1100, 255, 210, 55 }, "Hard")) {
+            if (menu_button((Rectangle){ 1100, 255, 210, 55 }, "Hard")) {
                 leaderboard_difficulty = 2;
             }
 
@@ -347,7 +362,7 @@ int main(){
                 DrawText("No completed games for this difficulty.",690, 440, 26, LIGHTGRAY);
                          
             }
-            if (MenuButton((Rectangle){ 760, 740, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 740, 380, 60 }, "Back")) {
                 menu_screen = MENU_MAIN;
             }
         }
@@ -358,7 +373,7 @@ int main(){
             DrawText("You can eat ghosts during their frightened phase",620,380,28,RAYWHITE);
             DrawText("Power pellets make ghosts frightened for a short time.", 620, 380, 28, RAYWHITE);
             DrawText("Use arrow keys or W A S D to move.", 620, 425, 28, RAYWHITE);
-            if (MenuButton((Rectangle){ 760, 600, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 600, 380, 60 }, "Back")) {
                 menu_screen = MENU_MAIN;
             }
         }
@@ -376,7 +391,7 @@ int main(){
 
             DrawText(about_text, 420, 300, 22, RAYWHITE);
             
-            if (MenuButton((Rectangle){ 760, 750, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 750, 380, 60 }, "Back")) {
                 menu_screen = MENU_MAIN;
             }
         }
@@ -416,7 +431,7 @@ int main(){
 
 
     int minute=0,second=0;
-    // Keeps the fraction of a second between frames.
+    
     float timer_accumulator = 0.0f;
     int score=0;
     int wall_position_x[28];
@@ -505,21 +520,39 @@ int main(){
             nextSpeed = (Vector2){0, -main_speed};
         }
 
-        //pacman er movement smooth er jonno
-        /*ekhane jkhn key press kora hoy tkhn next speed update hoy r speed mainly ager tai thake r then next speed turnbox e check hoy,
-        jodi turnbox kono wall na pay taile speed er vitor nexspeed assign kore dibe r oita intersection e gele turn korbe r jodi turnbox wall pay
-        taile speed ager tai thakbe r as usual cholte thakbe*/
         float shrink = 2;
 
-        Rectangle turnBox = {
-            position.x + nextSpeed.x * dt + shrink / 2,
-            position.y + nextSpeed.y * dt + shrink / 2,
-            26 - shrink,
-            26 - shrink
-        };
+        // Queue a turn until Pac-Man reaches the next tile line.  Turning while
+        // slightly off-grid puts his collision box into a wall and leaves him stuck.
+        bool moving_horizontally = fabsf(speed.x) > 0.0f;
+        bool requesting_horizontal = fabsf(nextSpeed.x) > 0.0f;
+        bool perpendicular_turn = (fabsf(speed.x) > 0.0f || fabsf(speed.y) > 0.0f) && (moving_horizontally != requesting_horizontal);
+                                  
+        float snap_tolerance = main_speed * dt + 0.01f;
+        bool at_turn_line = !perpendicular_turn || (moving_horizontally ? near_tile_line(position.x, 586.0f, snap_tolerance) : near_tile_line(position.y, 72.0f, snap_tolerance));
+                                 
+        if (at_turn_line) {
+            Vector2 turn_position = position;
 
-        if(!collision(turnBox, map)){
-            speed = nextSpeed;
+            if (perpendicular_turn) {
+                if (moving_horizontally) {
+                    turn_position.x = nearest_tile_line(position.x, 586.0f);
+                } else {
+                    turn_position.y = nearest_tile_line(position.y, 72.0f);
+                }
+            }
+
+            Rectangle turnBox = {
+                turn_position.x + nextSpeed.x * dt + shrink / 2,
+                turn_position.y + nextSpeed.y * dt + shrink / 2,
+                26 - shrink,
+                26 - shrink
+            };
+
+            if (!collision(turnBox, map)) {
+                position = turn_position;
+                speed = nextSpeed;
+            }
         }
 
         Rectangle collisionBox = {
@@ -538,7 +571,6 @@ int main(){
             position.y += speed.y*dt;
             
         }
-        //pacman = (Rectangle){position.x + speed.x*dt, position.y + speed.y*dt, 24, 24};
         
         pacman= (Rectangle){position.x,position.y,24,24};
         //dot collection
@@ -551,26 +583,13 @@ int main(){
             if (map[tile_i][tile_j] == 'd') {
                 map[tile_i][tile_j] = 'e'; 
                 score += 10;
-                
-                
-                
                 PlaySound(dot_sound);
-                 
-                
-                
-
             } 
             else if (map[tile_i][tile_j] == 'b') {
                 map[tile_i][tile_j] = 'e'; 
                 score += 50;
-
-                
-                
                 PlaySound(big_dot_sound);
-                
-                
-                
-                
+
                 phase=frightened;
                 flip_dir(&blinky_ghost);
                 flip_dir(&pinky_ghost);
@@ -710,17 +729,7 @@ int main(){
                 }
                 
             }
-        /*if(phase == frightened){
-            if(frightened_time<6.0f){
-                frightened_time+=dt;
-                
-                ghost_frightened(&g);
-                movement(&g,ghost_frightended_speed);
-
-
-            }
-            
-        */
+        
         
             if (phase == frightened){
                 if (CheckCollisionRecs(pacman, ghost_rec_blinky) && !blinky_ghost.eaten) {
@@ -749,7 +758,6 @@ int main(){
                     score += 200;
                 }
 
-                /* Do the same separately for Inky and Clyde */
                 
                 frightened_time += dt;
 
@@ -841,10 +849,6 @@ int main(){
                 if (at_tile_clyde) {
                     eaten_phase_clyde(&clyde_ghost); 
                 }
-                
-                
-
-                
                 if (ghost_tile_blinky.row == 11 && ghost_tile_blinky.col == 13 ) {
                     phase = chase;      
                     chase_time = 0.0f;  
@@ -967,14 +971,11 @@ int main(){
         }
 
         
-        
 
         BeginDrawing();
         ClearBackground(BLACK);
 
         
-        
-        //position = Vector2Add(position, Vector2Scale(speed,dt)); //s=s+vt vector2add((x,y),(a,b)) (x+a,y+b) 3(2i+3j)=6i+9j
         for(int i = 0; i<htiles; i++){
             for(int j = 0; j<wtiles; j++){
                 Texture *wall_map = NULL;
@@ -1044,7 +1045,6 @@ int main(){
         }
     }
 
-         
         
         for(int i=0; i<htiles;i++){
             for(int j=0; j<wtiles; j++){
@@ -1126,11 +1126,9 @@ int main(){
             DrawText("You passed the level!", 800, 50, 26, GREEN);
             nextSpeed=(Vector2){0.0f,0.0f};
             DrawText(TextFormat("Player: %s   Difficulty: %s", player_name,DifficultyName(selected_difficulty)),760, 82, 22, RAYWHITE);
-                                
-                     
+                
         }
         
-            
         
         if(over){
             DrawText("Game Over", 898, 514,26, RED);
@@ -1200,7 +1198,7 @@ int main(){
             DrawRectangleRec(draw_g_rec_clyde, GRAY);
         }
 
-        // Draw this last, so it stays above the maze, Pacman, and ghosts.
+        
         if (over || level_complete) {
             DrawRectangle(700, 560, 500, 250, Fade(BLACK, 0.85f));
             DrawRectangleLinesEx((Rectangle){ 700, 560, 500, 250 }, 2.0f, YELLOW);
@@ -1208,27 +1206,20 @@ int main(){
                      over ? RED : GREEN);
 
             
-            if (MenuButton((Rectangle){ 760, 695, 380, 48 }, "Menu")) {
+            if (menu_button((Rectangle){ 760, 695, 380, 48 }, "Menu")) {
                 return_to_menu = true;
             }
-            if (MenuButton((Rectangle){ 760, 755, 380, 48 }, "Quit")) {
+            if (menu_button((Rectangle){ 760, 755, 380, 48 }, "Quit")) {
                 quit_requested = true;
             }
         }
-        
+   
 
-        
-        
-        
         EndDrawing();
 
         if (quit_requested || return_to_menu) {
             break;
         }
-
-        
-
-        
 
 
     }
