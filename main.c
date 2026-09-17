@@ -34,6 +34,39 @@ typedef struct {
     int difficulty;
 } LeaderboardEntry;
 
+
+
+void ghost_sprite(Texture *g_sprite,int n, char *address){
+    for(int i=0; i<n; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\%s_%d.png", address,i+1);
+        g_sprite[i] = LoadTexture(path);
+    }
+}
+
+void draw_ghost_sprite(Texture *g_sprite, ghost g, int frame){
+    
+    DrawTexture(g_sprite[frame],(int)g.position.x,(int)g.position.y,WHITE);
+
+}
+
+void draw_eaten_ghost_sprite(Texture sprite_up,Texture sprite_down, Texture sprite_right, Texture sprite_left,ghost g){
+    if(g.dir == up){
+        DrawTexture(sprite_up,g.position.x, g.position.y , WHITE);
+    }
+    else if(g.dir == down){
+        DrawTexture(sprite_down,g.position.x, g.position.y , WHITE);
+    }
+    else if(g.dir == right){
+        DrawTexture(sprite_right,g.position.x, g.position.y , WHITE);
+    }
+    else if(g.dir == left){
+        DrawTexture(sprite_left,g.position.x, g.position.y , WHITE);
+    }
+}
+
+
+
 static bool menu_button(Rectangle bounds, const char *label)
 {
     Vector2 mouse = GetMousePosition();
@@ -242,6 +275,46 @@ int main(){
     InitAudioDevice(); 
 
     bool return_to_menu = false;
+    bool after_intro = false;
+
+    const char *background_path = "assets\\sprite\\pacman_intro.png";
+    Image background_image = LoadImage(background_path);
+    Texture2D background = { 0 };
+
+    if (IsImageValid(background_image)) {
+        ImageResize(&background_image, gwidth, gheight);
+        background = LoadTextureFromImage(background_image);
+        UnloadImage(background_image);
+    } else {
+        TraceLog(LOG_ERROR, "Could not load background image: %s", background_path);
+    }
+
+    
+    Sound start_sound = LoadSound("assets\\audio\\02. Start Music.mp3");
+    PlaySound(start_sound);
+
+    while(!WindowShouldClose() && !after_intro){
+        
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+
+        if (IsTextureValid(background)) {
+            DrawTexture(background, 0, 0, WHITE);
+        } else {
+            DrawText("BACKGROUND IMAGE FAILED TO LOAD", 620, 430, 32, RED);
+        }
+        DrawText("Press Enter to Continue", 700, 900, 40, RAYWHITE);
+        if(IsKeyPressed(KEY_ENTER)){
+            after_intro=true;
+        }
+
+
+        EndDrawing();
+    }
+
+    UnloadSound(start_sound);
+    
 
     main_menu:;
     MenuScreen menu_screen = MENU_MAIN;
@@ -253,15 +326,22 @@ int main(){
     int selected_difficulty = 1;
     int leaderboard_difficulty = 0;
     bool start_game = false;
+    
+
+    
+    
 
     while (!WindowShouldClose() && !start_game) {
         BeginDrawing();
         ClearBackground((Color){ 8, 10, 28, 255 });
+        
 
-        DrawText("PACMAN", 790, 100, 64, YELLOW);
+        
+
+        DrawText("PACMAN", 820, 100, 64, YELLOW);
 
         if (menu_screen == MENU_MAIN) {
-            DrawText("Main Menu", 830, 190, 34, RAYWHITE);
+            DrawText("Main Menu", 860, 190, 34, RAYWHITE);
 
             if (menu_button((Rectangle){ 760, 255, 380, 60 }, "Play")) {
                 menu_screen = MENU_NAME_INPUT;
@@ -347,7 +427,8 @@ int main(){
 
             int rank = 1;
             for (int i = 0; i < leaderboard_count; i++) {
-                if (leaderboard[i].difficulty != leaderboard_difficulty) continue;
+                if (leaderboard[i].difficulty != leaderboard_difficulty)
+                    continue;
 
                 DrawText(TextFormat("%d. %s", rank, leaderboard[i].name),600, 430 + (rank - 1) * 40, 24, RAYWHITE);
                          
@@ -362,23 +443,23 @@ int main(){
                 DrawText("No completed games for this difficulty.",690, 440, 26, LIGHTGRAY);
                          
             }
-            if (menu_button((Rectangle){ 760, 740, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 850, 380, 60 }, "Back")) {
                 menu_screen = MENU_MAIN;
             }
         }
         else if (menu_screen == MENU_RULES) {
-            DrawText("Game Rules", 800, 195, 40, YELLOW);
-            DrawText("Eat every dot to finish the level.", 620, 290, 28, RAYWHITE);
-            DrawText("Avoid ghosts unless they are frightened.", 620, 335, 28, RAYWHITE);
-            DrawText("You can eat ghosts during their frightened phase",620,380,28,RAYWHITE);
-            DrawText("Power pellets make ghosts frightened for a short time.", 620, 380, 28, RAYWHITE);
-            DrawText("Use arrow keys or W A S D to move.", 620, 425, 28, RAYWHITE);
+            DrawText("Game Rules", 838, 195, 40, YELLOW);
+            DrawText("-Eat every dot to finish the level.", 670, 290, 28, RAYWHITE);
+            DrawText("-Avoid ghosts unless they are frightened.", 670, 335, 28, RAYWHITE);
+            DrawText("-You can eat ghosts during their frightened phase",670,380,28,RAYWHITE);
+            DrawText("-Power pellets make ghosts frightened for a short time.", 670, 425, 28, RAYWHITE);
+            DrawText("-Use arrow keys or W A S D to move.", 670, 470, 28, RAYWHITE);
             if (menu_button((Rectangle){ 760, 600, 380, 60 }, "Back")) {
                 menu_screen = MENU_MAIN;
             }
         }
         else if (menu_screen == MENU_ABOUT) {
-            DrawText("About Us", 820, 220, 40, YELLOW);
+            DrawText("About Us", 860, 220, 40, YELLOW);
             
             const char *about_text ="We are presenting our Level-1/Term-1 (L1T1) group project. We have recreated one of\n\n"
                 "the most popular and OG game from 1980 till now uaing raylib functions. Presenting you the PACMAN!\n\n"
@@ -440,7 +521,7 @@ int main(){
     int dot_count=0;
     float ghost_speed_multiplier;
     if(selected_difficulty == 0){
-        ghost_speed_multiplier = 0.8f;
+        ghost_speed_multiplier = 0.9f;
 
     }
     else if(selected_difficulty == 2){
@@ -486,6 +567,126 @@ int main(){
     Texture tex_f = LoadTexture("assets\\sprite\\WALL_DOUBLE_CORNER_BR.png");
     Texture tex_l = LoadTexture("assets\\sprite\\WALL_DOUBLE_CORNER_BL.png");
     Texture tex_p = LoadTexture("assets\\sprite\\WALL_SINGLE_CORNER_BL.png");
+    Texture pac_sprite_up[3];
+    Texture pac_sprite_down[3];
+    Texture pac_sprite_right[3];
+    Texture pac_sprite_left[3];
+    Texture blinky_up[2];
+    Texture pinky_up[2];
+    Texture inky_up[2];
+    Texture clyde_up[2];
+    Texture blinky_down[2];
+    Texture pinky_down[2];
+    Texture inky_down[2];
+    Texture clyde_down[2];
+    Texture blinky_right[2];
+    Texture pinky_right[2];
+    Texture inky_right[2];
+    Texture clyde_right[2];
+    Texture blinky_left[2];
+    Texture pinky_left[2];
+    Texture inky_left[2];
+    Texture clyde_left[2];
+    Texture frightened_ghost[4];
+    Texture eaten_ghost_up = LoadTexture("assets\\ghost_eaten\\eaten_up.png");
+    Texture eaten_ghost_down = LoadTexture("assets\\ghost_eaten\\eaten_down.png");
+    Texture eaten_ghost_right = LoadTexture("assets\\ghost_eaten\\eaten_right.png");
+    Texture eaten_ghost_left = LoadTexture("assets\\ghost_eaten\\eaten_left.png");
+
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\pac_sprite\\pac_man_up_%d.png", i+1);
+        pac_sprite_up[i] = LoadTexture(path);
+    }
+
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\pac_sprite\\pac_man_down_%d.png", i+1);
+        pac_sprite_down[i] = LoadTexture(path);
+    }
+
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\pac_sprite\\pac_man_right_%d.png", i+1);
+        pac_sprite_right[i] = LoadTexture(path);
+    }
+
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\pac_sprite\\pac_man_left_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+
+    for(int i = 0; i < 4; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_frightened\\frightened_%d.png", i+1);
+        frightened_ghost[i] = LoadTexture(path);
+    }
+
+
+    /*for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\pinky_left_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\inky_left_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\blinky_left_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\clyde_left_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\clyde_right_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\inky_right_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\blinky_right_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }
+    for(int i=0; i<3; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\pinky_right_%d.png", i+1);
+        pac_sprite_left[i] = LoadTexture(path);
+    }*/
+   ghost_sprite(blinky_up,2, "blinky_up");
+   ghost_sprite(inky_up,2, "inky_up");
+   ghost_sprite(pinky_up,2, "pinky_up");
+   ghost_sprite(clyde_up,2, "clyde_up");
+
+   ghost_sprite(inky_down,2, "inky_down");
+   ghost_sprite(blinky_down,2, "blinky_down");
+   ghost_sprite(pinky_down,2, "pinky_down");
+   ghost_sprite(clyde_down,2, "clyde_down");
+
+   ghost_sprite(inky_right,2, "inky_right");
+   ghost_sprite(blinky_right,2, "blinky_right");
+   ghost_sprite(pinky_right,2, "pinky_right");
+   ghost_sprite(clyde_right,2, "clyde_right");
+
+   ghost_sprite(inky_left,2, "inky_left");
+   ghost_sprite(blinky_left,2, "blinky_left");
+   ghost_sprite(pinky_left,2, "pinky_left");
+   ghost_sprite(clyde_left,2, "clyde_left");
+    
+    
+    
     
     
     
@@ -522,8 +723,7 @@ int main(){
 
         float shrink = 2;
 
-        // Queue a turn until Pac-Man reaches the next tile line.  Turning while
-        // slightly off-grid puts his collision box into a wall and leaves him stuck.
+        
         bool moving_horizontally = fabsf(speed.x) > 0.0f;
         bool requesting_horizontal = fabsf(nextSpeed.x) > 0.0f;
         bool perpendicular_turn = (fabsf(speed.x) > 0.0f || fabsf(speed.y) > 0.0f) && (moving_horizontally != requesting_horizontal);
@@ -571,6 +771,9 @@ int main(){
             position.y += speed.y*dt;
             
         }
+        else {
+            speed = (Vector2){0, 0};
+        }
         
         pacman= (Rectangle){position.x,position.y,24,24};
         //dot collection
@@ -593,6 +796,8 @@ int main(){
                 phase=frightened;
                 flip_dir(&blinky_ghost);
                 flip_dir(&pinky_ghost);
+                flip_dir(&inky_ghost);
+                flip_dir(&clyde_ghost);
             }
         }
 
@@ -732,26 +937,26 @@ int main(){
         
         
             if (phase == frightened){
-                if (CheckCollisionRecs(pacman, ghost_rec_blinky) && !blinky_ghost.eaten) {
+                if (CheckCollisionRecs(pacman, ghost_rec_blinky) && !blinky_ghost.eaten && !blinky_ghost.ignore_frightened) {
                     
                     blinky_ghost.eaten = true;
                     PlaySound(ghost_eaten_sound);
                     score += 200;
                 }
 
-                if (CheckCollisionRecs(pacman, ghost_rec_pinky) && !pinky_ghost.eaten) {
+                if (CheckCollisionRecs(pacman, ghost_rec_pinky) && !pinky_ghost.eaten && !pinky_ghost.ignore_frightened) {
                     
                     pinky_ghost.eaten = true;
                     PlaySound(ghost_eaten_sound);
                     score += 200;
                 }
-                if (CheckCollisionRecs(pacman, ghost_rec_inky) && !inky_ghost.eaten) {
+                if (CheckCollisionRecs(pacman, ghost_rec_inky) && !inky_ghost.eaten && !inky_ghost.ignore_frightened) {
                     
                     inky_ghost.eaten = true;
                     PlaySound(ghost_eaten_sound);
                     score += 200;
                 }
-                if (CheckCollisionRecs(pacman, ghost_rec_clyde) && !clyde_ghost.eaten) {
+                if (CheckCollisionRecs(pacman, ghost_rec_clyde) && !clyde_ghost.eaten && !clyde_ghost.ignore_frightened) {
                     
                     clyde_ghost.eaten = true;
                     PlaySound(ghost_eaten_sound);
@@ -877,10 +1082,8 @@ int main(){
                 tile t = tiles_no(blinky_ghost.position);
                 Vector2 tile_pos = pixel(t);
 
-                bool at_tile =
-                    fabsf(blinky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(blinky_ghost.position.y - tile_pos.y) < 1.0f;
-                    
-
+                bool at_tile = fabsf(blinky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(blinky_ghost.position.y - tile_pos.y) < 1.0f;
+      
                 if (at_tile) {
                     blinky_ghost.position = tile_pos;
                     eaten_phase_blinky(&blinky_ghost);
@@ -959,7 +1162,7 @@ int main(){
                 }
 
                 movement(&clyde_ghost, ghost_eaten_speed * ghost_speed_multiplier);
-                check_eaten_reset(&clyde_ghost, (tile){ 11, 12 });
+                check_eaten_reset(&clyde_ghost, (tile){ 11, 14 });
             }
             else if (phase == frightened && !clyde_ghost.ignore_frightened) {
                 movement(&clyde_ghost, ghost_frightended_speed * ghost_speed_multiplier);
@@ -1136,7 +1339,26 @@ int main(){
             
         }
 
-        DrawRectangleRec(pacman, YELLOW);
+        //DrawRectangleRec(pacman, YELLOW);
+        int frame = ((int)(GetTime() * 10)) % 3;
+        if(speed.x>0){
+            DrawTexture(pac_sprite_right[frame], position.x, position.y, WHITE);
+        }
+        else if(speed.x<0){
+            DrawTexture(pac_sprite_left[frame], position.x, position.y, WHITE);
+        }
+        else if(speed.y>0){
+            DrawTexture(pac_sprite_down[frame], position.x, position.y, WHITE);
+        }
+        else if(speed.y<0){
+            DrawTexture(pac_sprite_up[frame], position.x, position.y, WHITE);
+        }
+        else if(speed.x == 0 && speed.y == 0){
+            DrawTexture(pac_sprite_up[0], position.x, position.y, WHITE);
+        }
+        
+
+        
         
         DrawText(TextFormat("SCORE: %d", score), 586, 30, 30, WHITE);
         DrawText("LIFE:",600,895,26,WHITE);
@@ -1172,38 +1394,91 @@ int main(){
         Rectangle draw_g_rec_inky = g_rec(&inky_ghost,inky);
         Rectangle draw_g_rec_clyde = g_rec(&clyde_ghost,clyde);
 
-        if(phase==frightened){
-            DrawRectangleRec(draw_g_rec_blinky, BLUE);
-            DrawRectangleRec(draw_g_rec_pinky, BLUE);
-            DrawRectangleRec(draw_g_rec_inky, BLUE);
-            DrawRectangleRec(draw_g_rec_clyde, BLUE);
+        //DrawRectangleRec(draw_g_rec_blinky,(phase == frightened && !blinky_ghost.ignore_frightened) ? BLUE : RED);
+        int frame1 = ((int)(GetTime() * 10)) % 2;
+        int frame2 = ((int)(GetTime() * 10)) % 4;
+
+        if(phase == frightened && !blinky_ghost.ignore_frightened){
+            DrawTexture(frightened_ghost[frame2],blinky_ghost.position.x,blinky_ghost.position.y,WHITE);
         }
         else{
-            DrawRectangleRec(draw_g_rec_blinky, RED);
-            DrawRectangleRec(draw_g_rec_pinky, PINK);
-            DrawRectangleRec(draw_g_rec_inky, SKYBLUE);
-            DrawRectangleRec(draw_g_rec_clyde, ORANGE);
+            
+            if(blinky_ghost.dir == up)
+                draw_ghost_sprite(blinky_up, blinky_ghost, frame1);
+            else if(blinky_ghost.dir == down)
+                draw_ghost_sprite(blinky_down, blinky_ghost, frame1);
+            else if(blinky_ghost.dir == right)
+                draw_ghost_sprite(blinky_right, blinky_ghost, frame1);
+            else if(blinky_ghost.dir == left)
+                draw_ghost_sprite(blinky_left, blinky_ghost, frame1);
         }
+
+        if(phase == frightened && !pinky_ghost.ignore_frightened){
+            DrawTexture(frightened_ghost[frame2],pinky_ghost.position.x,pinky_ghost.position.y,WHITE);
+        }
+        else{
+            
+            if(pinky_ghost.dir == up)
+                draw_ghost_sprite(pinky_up, pinky_ghost, frame1);
+            else if(pinky_ghost.dir == down)
+                draw_ghost_sprite(pinky_down, pinky_ghost, frame1);
+            else if(pinky_ghost.dir == right)
+                draw_ghost_sprite(pinky_right, pinky_ghost, frame1);
+            else if(pinky_ghost.dir == left)
+                draw_ghost_sprite(pinky_left, pinky_ghost, frame1);
+        }
+
+        if(phase == frightened && !inky_ghost.ignore_frightened){
+            DrawTexture(frightened_ghost[frame2],inky_ghost.position.x,inky_ghost.position.y,WHITE);
+        }
+        else{
+            
+            if(inky_ghost.dir == up)
+                draw_ghost_sprite(inky_up, inky_ghost, frame1);
+            else if(inky_ghost.dir == down)
+                draw_ghost_sprite(inky_down, inky_ghost, frame1);
+            else if(inky_ghost.dir == right)
+                draw_ghost_sprite(inky_right, inky_ghost, frame1);
+            else if(inky_ghost.dir == left)
+                draw_ghost_sprite(inky_left, inky_ghost, frame1);
+        }
+
+        if(phase == frightened && !clyde_ghost.ignore_frightened){
+            DrawTexture(frightened_ghost[frame2],clyde_ghost.position.x,clyde_ghost.position.y,WHITE);
+        }
+        else{
+            
+            if(clyde_ghost.dir == up)
+                draw_ghost_sprite(clyde_up, clyde_ghost, frame1);
+            else if(clyde_ghost.dir == down)
+                draw_ghost_sprite(clyde_down, clyde_ghost, frame1);
+            else if(clyde_ghost.dir == right)
+                draw_ghost_sprite(clyde_right, clyde_ghost, frame1);
+            else if(clyde_ghost.dir == left)
+                draw_ghost_sprite(clyde_left, clyde_ghost, frame1);
+        }
+            
+        
         if(blinky_ghost.eaten){
-            DrawRectangleRec(draw_g_rec_blinky, GRAY);
+            draw_eaten_ghost_sprite(eaten_ghost_up,eaten_ghost_down, eaten_ghost_right, eaten_ghost_left, blinky_ghost);
             
         }
         if(pinky_ghost.eaten){
-            DrawRectangleRec(draw_g_rec_pinky, GRAY);
+           draw_eaten_ghost_sprite(eaten_ghost_up,eaten_ghost_down, eaten_ghost_right, eaten_ghost_left, pinky_ghost);
         }
         if(inky_ghost.eaten){
-            DrawRectangleRec(draw_g_rec_inky, GRAY);
+            draw_eaten_ghost_sprite(eaten_ghost_up,eaten_ghost_down, eaten_ghost_right, eaten_ghost_left, inky_ghost);
         }
         if(clyde_ghost.eaten){
-            DrawRectangleRec(draw_g_rec_clyde, GRAY);
+            draw_eaten_ghost_sprite(eaten_ghost_up,eaten_ghost_down, eaten_ghost_right, eaten_ghost_left, clyde_ghost);
         }
 
         
         if (over || level_complete) {
             DrawRectangle(700, 560, 500, 250, Fade(BLACK, 0.85f));
             DrawRectangleLinesEx((Rectangle){ 700, 560, 500, 250 }, 2.0f, YELLOW);
-            DrawText(over ? "Game Over" : "Level Complete", 820, 580, 34,
-                     over ? RED : GREEN);
+            DrawText(over ? "Game Over" : "Level Complete", 820, 580, 34,over ? RED : GREEN);
+                     
 
             
             if (menu_button((Rectangle){ 760, 695, 380, 48 }, "Menu")) {
@@ -1235,6 +1510,45 @@ int main(){
     UnloadTexture(tex_f);
     UnloadTexture(tex_l);
     UnloadTexture(tex_p);
+
+    for(int i=0 ;i < 3; i++){
+        UnloadTexture(pac_sprite_up[i]);
+        UnloadTexture(pac_sprite_down[i]);
+        UnloadTexture(pac_sprite_right[i]);
+        UnloadTexture(pac_sprite_left[i]);
+    }
+
+    UnloadTexture(eaten_ghost_up);
+    UnloadTexture(eaten_ghost_down);
+    UnloadTexture(eaten_ghost_right);
+    UnloadTexture(eaten_ghost_left);
+    
+    for(int i = 0; i < 2; i++){
+        UnloadTexture(blinky_up[i]);
+        UnloadTexture(blinky_down[i]);
+        UnloadTexture(blinky_right[i]);
+        UnloadTexture(blinky_left[i]);
+
+        UnloadTexture(pinky_up[i]);
+        UnloadTexture(pinky_down[i]);
+        UnloadTexture(pinky_right[i]);
+        UnloadTexture(pinky_left[i]);
+
+        UnloadTexture(inky_up[i]);
+        UnloadTexture(inky_down[i]);
+        UnloadTexture(inky_right[i]);
+        UnloadTexture(inky_left[i]);
+
+        UnloadTexture(clyde_up[i]);
+        UnloadTexture(clyde_down[i]);
+        UnloadTexture(clyde_right[i]);
+        UnloadTexture(clyde_left[i]);
+    }
+
+    for(int i = 0; i < 4; i++){
+        UnloadTexture(frightened_ghost[i]);
+    }
+    
     
 
 

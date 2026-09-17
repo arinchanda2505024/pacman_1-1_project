@@ -19,6 +19,7 @@ float dt=1.0f/60;
 
 void init_phase(ghost *g,ghost_name name){
     g->name=name;
+    g->ignore_frightened = false;
     switch (name)
     {
     case blinky:
@@ -313,11 +314,11 @@ void blinky_chase_alg(ghost *g,Vector2 pacpos){
 void pinky_chase_alg(ghost *g,Vector2 pacpos,Vector2 speed){
     Vector2 target=pacpos;
     if(speed.x>0)
-    target.x+=4*26;
+        target.x+=4*26;
     else if(speed.x<0)
-    target.x-=4*26;
+        target.x-=4*26;
     else if(speed.y>0)
-    target.y+=4*26;
+        target.y+=4*26;
     else if(speed.y<0){
         target.y-=4*26;
     }
@@ -423,9 +424,9 @@ void movement(ghost *g,float speed){
     tile next_tile = tiles_no(next);
 
     if(!wall(next_tile)){
-        g->position = next;              // path is clear, move normally
+        g->position = next;              
     } else {
-        g->position = aligned;           // blocked: snap to exact tile center
+        g->position = aligned;           
     }        
     
 
@@ -459,191 +460,105 @@ void flip_dir(ghost *g){
 }
 
 void ghost_frightened(ghost *g){
-    tile t=tiles_no(g->position);
-    bool w;
+    tile current = tiles_no(g->position);
+    direction choices[3];
+    int count = 0;
 
-    if(g->dir==up){
-        random=rand()%2;
-        
-        if(random==1){
-            t.col++;
-            w=wall(t);
-            if(!w) {
-                g->dir=right;
-            } 
-            else {
-                t.col -= 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=left;
-                else {
-                    
-                    t = tiles_no(g->position); t.row--;
-                    if(wall(t)) g->dir=down; 
-                }
-            }
-        }
-        else{
-            t.col--;
-            w=wall(t);
-            if(!w) {
-                g->dir=left;
-            } 
-            else {
-                t.col += 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=right;
-                else {
-                    t = tiles_no(g->position);
-                    t.row--;
-                    if(wall(t)) g->dir=down; 
-                }
-            }
-        }
+    
+    direction candidates[4] = { up, down, right, left };
+    direction reverse = g->dir;
+    if (reverse == up)
+        reverse = down;
+    else if (reverse == down)
+        reverse = up;
+    else if (reverse == right)
+        reverse = left;
+    else
+        reverse = right;
+
+    for (int i = 0; i < 4; ++i) {
+        direction candidate = candidates[i];
+        tile next = current;
+        if (candidate == up)
+            --next.row;
+        else if (candidate == down)
+            ++next.row;
+        else if (candidate == right)
+            ++next.col;
+        else
+            --next.col;
+
+        if (!wall(next) && candidate != reverse)
+            choices[count++] = candidate;
     }
-    else if(g->dir==down){
-        random=rand()%2;
-        
-        if(random==1){
-            t.col++;
-            w=wall(t);
-            if(!w) {
-                g->dir=right;
-            } 
-            else {
-                t.col -= 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=left;
-                else {
-                    t = tiles_no(g->position); 
-                    t.row++;
-                    if(wall(t)) g->dir=up;
-                }
-            }
-        }
-        else{
-            t.col--;
-            w=wall(t);
-            if(!w) {
-                g->dir=left;
-            } 
-            else {
-                t.col += 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=right;
-                else {
-                    t = tiles_no(g->position); 
-                    t.row++;
-                    if(wall(t)) g->dir=up;
-                }
-            }
-        }
-    }
-    else if(g->dir==right){
-        random=rand()%2;
-        if(random==0){
-            t.row++;
-            w=wall(t);
-            if(!w) {
-                g->dir=down;
-            } 
-            else {
-                t.row -= 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=up;
-                else {
-                    t = tiles_no(g->position); 
-                    t.col++;
-                    if(wall(t)) g->dir=left;
-                }
-            }
-        }
-        else if(random==1){
-            t.row--;
-            w=wall(t);
-            if(!w) {
-                g->dir=up;
-            } 
-            else {
-                t.row += 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=down;
-                else {
-                    t = tiles_no(g->position); 
-                    t.col++;
-                    if(wall(t)) g->dir=left;
-                }
-            }
-        }
-        
-    }
-    else if(g->dir==left){
-        random=rand()%2;
-        if(random==0){
-            t.row++;
-            w=wall(t);
-            if(!w) {
-                g->dir=down;
-            } 
-            else {
-                t.row -= 2; 
-                w=wall(t);
-                if(!w) 
-                g->dir=up;
-                else {
-                    t = tiles_no(g->position); 
-                    t.col--;
-                    if(wall(t)) g->dir=right;
-                }
-            }
-        }
-        else{
-            t.row--;
-            w=wall(t);
-            if(!w) {
-                g->dir=up;
-            } 
-            else {
-                t.row += 2;
-                w=wall(t);
-                if(!w) 
-                g->dir=down;
-                else {
-                    t = tiles_no(g->position); 
-                    t.col--;
-                    if(wall(t)) g->dir=right;
-                }
-            }
-        }
+
+    if (count == 0) {
+        g->dir = reverse; 
+    } else {
+        g->dir = choices[rand() % count];
     }
     g->color=BLUE;
     
 }
 
 
+static void choose_eaten_direction(ghost *g, tile home) {
+    tile current = tiles_no(g->position);
+    direction candidates[4] = { up, left, down, right };
+    
+    
+    direction reverse = g->dir;
+    if (reverse == up) reverse = down;
+    else if (reverse == down) reverse = up;
+    else if (reverse == right) reverse = left;
+    else reverse = right;
+
+    float best_distance = INFINITY;
+    direction best_dir = reverse;
+    bool found_path = false;
+
+    for (int i = 0; i < 4; ++i) {
+        
+        if (candidates[i] == reverse) continue;
+
+        tile next = current;
+        if (candidates[i] == up)         --next.row;
+        else if (candidates[i] == down)  ++next.row;
+        else if (candidates[i] == right) ++next.col;
+        else                             --next.col;
+
+        if (!wall(next)) {
+            float distance = Vector2Distance(pixel(next), pixel(home));
+            if (distance < best_distance) {
+                best_distance = distance;
+                best_dir = candidates[i];
+                found_path = true;
+            }
+        }
+    }
+
+    
+    if (found_path) {
+        g->dir = best_dir;
+    } else {
+        g->dir = reverse;
+    }
+}
+
 void eaten_phase_blinky(ghost *g){
-    Vector2 home=pixel((tile){11,13});
-    blinky_chase_alg(g,home);
+    choose_eaten_direction(g, (tile){ 11, 13 });
 }
 
 void eaten_phase_pinky(ghost *g){
-    Vector2 home=pixel((tile){11,12});
-    blinky_chase_alg(g,home);
+    choose_eaten_direction(g, (tile){ 11, 12 });
 }
 
 void eaten_phase_inky(ghost *g){
-    Vector2 home=pixel((tile){11,15});
-    blinky_chase_alg(g,home);
+    choose_eaten_direction(g, (tile){ 11, 15 });
 }
 
 void eaten_phase_clyde(ghost *g){
-    Vector2 home=pixel((tile){11,14});
-    blinky_chase_alg(g,home);
+    choose_eaten_direction(g, (tile){ 11, 14 });
 }
 
 void check_eaten_reset(ghost *g, tile home) {
