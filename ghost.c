@@ -416,12 +416,22 @@ void movement(ghost *g,float speed){
 
     Vector2 next = g->position;
     
-    if(g->dir == up)    next.y -= speed*dt;
-    else if(g->dir == down)  next.y += speed*dt;
-    else if(g->dir == right) next.x += speed*dt;
-    else if(g->dir == left)  next.x -= speed*dt;
+    if(g->dir == up)
+        next.y -= speed*dt;
+    else if(g->dir == down) 
+         next.y += speed*dt;
+    else if(g->dir == right) 
+        next.x += speed*dt;
+    else if(g->dir == left) 
+         next.x -= speed*dt;
 
-    tile next_tile = tiles_no(next);
+    Vector2 lead = next;
+    if(g->dir == right) 
+        lead.x += 23;
+    else if(g->dir == down) 
+        lead.y += 23;
+
+    tile next_tile = tiles_no(lead);
 
     if(!wall(next_tile)){
         g->position = next;              

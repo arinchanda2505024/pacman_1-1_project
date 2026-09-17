@@ -14,7 +14,7 @@
 #define htiles 31
 #define main_speed 110
 
-#define MAX_PLAYER_NAME 20
+#define MAX_PLAYER_NAME 15
 #define MAX_LEADERBOARD_ENTRIES 15
 
 typedef enum {
@@ -67,14 +67,30 @@ void draw_eaten_ghost_sprite(Texture sprite_up,Texture sprite_down, Texture spri
 
 
 
-static bool menu_button(Rectangle bounds, const char *label)
+static bool menu_button(Rectangle bounds, const char *label, int button_id, Sound hover_sound, Sound click_sound)
 {
+    
+    static bool was_hovered[32] = { false };
     Vector2 mouse = GetMousePosition();
     bool hovered = CheckCollisionPointRec(mouse, bounds);
+    
+
+    if(hovered && !was_hovered[button_id]){
+        PlaySound(hover_sound);
+        
+    }
+
+    was_hovered[button_id] = hovered;
+
+    bool clicked = hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    if(clicked)
+        PlaySound(click_sound);
+    
     DrawRectangleRec(bounds, hovered ? DARKBLUE : BLUE);
     DrawRectangleLinesEx(bounds, 2.0f, SKYBLUE);
     DrawText(label, (int)(bounds.x + 22), (int)(bounds.y + 12), 28, RAYWHITE);
-    return hovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    return clicked;
 }
 
 static int LoadLeaderboard(LeaderboardEntry entries[MAX_LEADERBOARD_ENTRIES])
@@ -272,10 +288,13 @@ int main(){
     
     InitWindow(gwidth, gheight, "Pacman");
     SetTargetFPS(60);
+    SetExitKey(KEY_NULL);
     InitAudioDevice(); 
 
+    
     bool return_to_menu = false;
     bool after_intro = false;
+    
 
     const char *background_path = "assets\\sprite\\pacman_intro.png";
     Image background_image = LoadImage(background_path);
@@ -289,6 +308,9 @@ int main(){
         TraceLog(LOG_ERROR, "Could not load background image: %s", background_path);
     }
 
+    Sound menu_hover_sound = LoadSound("assets\\audio\\tunetank.com_menu-hover-click.wav");
+    SetSoundVolume(menu_hover_sound, 0.35f);
+    Sound menu_click_sound = LoadSound("assets\\audio\\freesound_community-menu-selection-102220.mp3");
     
     Sound start_sound = LoadSound("assets\\audio\\02. Start Music.mp3");
     PlaySound(start_sound);
@@ -316,7 +338,8 @@ int main(){
     UnloadSound(start_sound);
     
 
-    main_menu:;
+    main_menu:
+    bool paused = false;
     MenuScreen menu_screen = MENU_MAIN;
     LeaderboardEntry leaderboard[MAX_LEADERBOARD_ENTRIES] = { 0 };
     int leaderboard_count = LoadLeaderboard(leaderboard);
@@ -343,20 +366,20 @@ int main(){
         if (menu_screen == MENU_MAIN) {
             DrawText("Main Menu", 860, 190, 34, RAYWHITE);
 
-            if (menu_button((Rectangle){ 760, 255, 380, 60 }, "Play")) {
+            if (menu_button((Rectangle){ 760, 255, 380, 60 }, "Play",0,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_NAME_INPUT;
             }
             
-            if (menu_button((Rectangle){ 760, 330, 380, 60 }, "Leaderboard")) {
+            if (menu_button((Rectangle){ 760, 330, 380, 60 }, "Leaderboard",1,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_LEADERBOARD;
             }
-            if (menu_button((Rectangle){ 760, 405, 380, 60 }, "Game Rules")) {
+            if (menu_button((Rectangle){ 760, 405, 380, 60 }, "Game Rules",2,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_RULES;
             }
-            if (menu_button((Rectangle){ 760, 480, 380, 60 }, "About Us")) {
+            if (menu_button((Rectangle){ 760, 480, 380, 60 }, "About Us",3,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_ABOUT;
             }
-            if (menu_button((Rectangle){ 760, 555, 380, 60 }, "Quit")) {
+            if (menu_button((Rectangle){ 760, 555, 380, 60 }, "Quit",4,menu_hover_sound,menu_click_sound)) {
                 EndDrawing();
                 CloseAudioDevice();
                 CloseWindow();
@@ -364,11 +387,11 @@ int main(){
             }
         }
         else if (menu_screen == MENU_NAME_INPUT) {
-            DrawText("Enter your name", 765, 260, 36, RAYWHITE);
+            DrawText("Enter your name", 810, 260, 36, RAYWHITE);
             DrawRectangle(700, 330, 500, 58, DARKBLUE);
             DrawRectangleLinesEx((Rectangle){ 700, 330, 500, 58 }, 2.0f, SKYBLUE);
             DrawText(player_name, 720, 345, 30, WHITE);
-            DrawText("Press Enter to continue", 770, 430, 24, LIGHTGRAY);
+            DrawText("Press Enter to continue", 812, 430, 24, LIGHTGRAY);
 
             int key = GetCharPressed();
             while (key > 0) {
@@ -386,40 +409,41 @@ int main(){
             if (IsKeyPressed(KEY_ENTER) && player_name_length > 0) {
                 menu_screen = MENU_DIFFICULTY;
             }
-            if (IsKeyPressed(KEY_ESCAPE))
+            if (menu_button((Rectangle){ 760, 560, 380, 60 }, "Back",8,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_MAIN;
+            }
         }
         else if (menu_screen == MENU_DIFFICULTY) {
             DrawText("Choose difficulty", 735, 220, 36, RAYWHITE);
-            if (menu_button((Rectangle){ 760, 300, 380, 60 }, "Easy")) {
+            if (menu_button((Rectangle){ 760, 300, 380, 60 }, "Easy",5,menu_hover_sound,menu_click_sound)) {
                 selected_difficulty = 0;
                 start_game = true;
             }
-            if (menu_button((Rectangle){ 760, 380, 380, 60 }, "Normal")) {
+            if (menu_button((Rectangle){ 760, 380, 380, 60 }, "Normal",6,menu_hover_sound,menu_click_sound)) {
                 selected_difficulty = 1;
                 start_game = true;
             }
-            if (menu_button((Rectangle){ 760, 460, 380, 60 }, "Hard")) {
+            if (menu_button((Rectangle){ 760, 460, 380, 60 }, "Hard",7,menu_hover_sound,menu_click_sound)) {
                 selected_difficulty = 2;
                 start_game = true;
             }
-            if (menu_button((Rectangle){ 760, 560, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 560, 380, 60 }, "Back",8,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_MAIN;
             }
         }
         else if (menu_screen == MENU_LEADERBOARD) {
-            DrawText("Leaderboard", 770, 185, 40, YELLOW);
-            if (menu_button((Rectangle){ 590, 255, 210, 55 }, "Easy")) {
+            DrawText("Leaderboard", 822, 185, 40, YELLOW);
+            if (menu_button((Rectangle){ 590, 255, 210, 55 }, "Easy",9,menu_hover_sound,menu_click_sound)) {
                 leaderboard_difficulty = 0;
             }
-            if (menu_button((Rectangle){ 845, 255, 210, 55 }, "Normal")) {
+            if (menu_button((Rectangle){ 845, 255, 210, 55 }, "Normal",10,menu_hover_sound,menu_click_sound)) {
                 leaderboard_difficulty = 1;
             }
-            if (menu_button((Rectangle){ 1100, 255, 210, 55 }, "Hard")) {
+            if (menu_button((Rectangle){ 1100, 255, 210, 55 }, "Hard",11,menu_hover_sound,menu_click_sound)) {
                 leaderboard_difficulty = 2;
             }
 
-            DrawText(TextFormat("%s leaderboard", DifficultyName(leaderboard_difficulty)),760, 335, 28, RAYWHITE);
+            DrawText(TextFormat("%s leaderboard", DifficultyName(leaderboard_difficulty)),810, 335, 28, RAYWHITE);
                      
             DrawText("Player", 600, 385, 26, SKYBLUE);
             DrawText("Score", 950, 385, 26, SKYBLUE);
@@ -443,7 +467,7 @@ int main(){
                 DrawText("No completed games for this difficulty.",690, 440, 26, LIGHTGRAY);
                          
             }
-            if (menu_button((Rectangle){ 760, 850, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 850, 380, 60 }, "Back",12,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_MAIN;
             }
         }
@@ -454,7 +478,7 @@ int main(){
             DrawText("-You can eat ghosts during their frightened phase",670,380,28,RAYWHITE);
             DrawText("-Power pellets make ghosts frightened for a short time.", 670, 425, 28, RAYWHITE);
             DrawText("-Use arrow keys or W A S D to move.", 670, 470, 28, RAYWHITE);
-            if (menu_button((Rectangle){ 760, 600, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 600, 380, 60 }, "Back",13,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_MAIN;
             }
         }
@@ -472,7 +496,7 @@ int main(){
 
             DrawText(about_text, 420, 300, 22, RAYWHITE);
             
-            if (menu_button((Rectangle){ 760, 750, 380, 60 }, "Back")) {
+            if (menu_button((Rectangle){ 760, 750, 380, 60 }, "Back",14,menu_hover_sound,menu_click_sound)) {
                 menu_screen = MENU_MAIN;
             }
         }
@@ -555,18 +579,33 @@ int main(){
     //f= bottom right double corner, l= bottom left double corner
     
     //wall sprite er jonno
-    Texture tex_c = LoadTexture("assets\\sprite\\WALL_DOUBLE_CORNER_TL.png");
-    Texture tex_s = LoadTexture("assets\\sprite\\WALL_DOUBLE_H.png");
-    Texture tex_a = LoadTexture("assets\\sprite\\WALL_DOUBLE_CORNER_TR.png");
-    Texture tex_t = LoadTexture("assets\\sprite\\WALL_DOUBLE_V.png");
-    Texture tex_v = LoadTexture("assets\\sprite\\WALL_SINGLE_V.png");
-    Texture tex_u = LoadTexture("assets\\sprite\\WALL_SINGLE_CORNER_TL.png");
-    Texture tex_w = LoadTexture("assets\\sprite\\WALL_SINGLE_H.png");
-    Texture tex_g = LoadTexture("assets\\sprite\\WALL_SINGLE_CORNER_TR.png");
-    Texture tex_r = LoadTexture("assets\\sprite\\WALL_SINGLE_CORNER_BR.png");
-    Texture tex_f = LoadTexture("assets\\sprite\\WALL_DOUBLE_CORNER_BR.png");
-    Texture tex_l = LoadTexture("assets\\sprite\\WALL_DOUBLE_CORNER_BL.png");
-    Texture tex_p = LoadTexture("assets\\sprite\\WALL_SINGLE_CORNER_BL.png");
+    Texture tex_c, tex_s, tex_a, tex_t, tex_v, tex_u;
+    Texture tex_w, tex_g, tex_r, tex_f, tex_l, tex_p;
+
+    const char *wall_folder;
+
+    if (selected_difficulty == 0) {
+        wall_folder = "assets\\sprite\\ez";
+    }
+    else if (selected_difficulty == 2) {
+        wall_folder = "assets\\sprite\\hard";
+    }
+    else {
+        wall_folder = "assets\\sprite";
+    }
+
+    tex_c = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_TL.png", wall_folder));
+    tex_s = LoadTexture(TextFormat("%s\\WALL_DOUBLE_H.png", wall_folder));
+    tex_a = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_TR.png", wall_folder));
+    tex_t = LoadTexture(TextFormat("%s\\WALL_DOUBLE_V.png", wall_folder));
+    tex_v = LoadTexture(TextFormat("%s\\WALL_SINGLE_V.png", wall_folder));
+    tex_u = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_TL.png", wall_folder));
+    tex_w = LoadTexture(TextFormat("%s\\WALL_SINGLE_H.png", wall_folder));
+    tex_g = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_TR.png", wall_folder));
+    tex_r = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_BR.png", wall_folder));
+    tex_f = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_BR.png", wall_folder));
+    tex_l = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_BL.png", wall_folder));
+    tex_p = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_BL.png", wall_folder));
     Texture pac_sprite_up[3];
     Texture pac_sprite_down[3];
     Texture pac_sprite_right[3];
@@ -592,6 +631,7 @@ int main(){
     Texture eaten_ghost_down = LoadTexture("assets\\ghost_eaten\\eaten_down.png");
     Texture eaten_ghost_right = LoadTexture("assets\\ghost_eaten\\eaten_right.png");
     Texture eaten_ghost_left = LoadTexture("assets\\ghost_eaten\\eaten_left.png");
+    
 
     for(int i=0; i<3; i++){
         char path[100];
@@ -624,47 +664,7 @@ int main(){
     }
 
 
-    /*for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\pinky_left_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\inky_left_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\blinky_left_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\clyde_left_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\clyde_right_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\inky_right_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\blinky_right_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }
-    for(int i=0; i<3; i++){
-        char path[100];
-        sprintf(path, "assets\\ghost_sprite\\pinky_right_%d.png", i+1);
-        pac_sprite_left[i] = LoadTexture(path);
-    }*/
+    
    ghost_sprite(blinky_up,2, "blinky_up");
    ghost_sprite(inky_up,2, "inky_up");
    ghost_sprite(pinky_up,2, "pinky_up");
@@ -706,470 +706,499 @@ int main(){
     bool leaderboard_saved = false;
     
     while(!WindowShouldClose()){
-        float dt= GetFrameTime();
-        //pacman er movement:
-        if(IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)){
-            nextSpeed = (Vector2){-main_speed, 0};
-        }
-        else if(IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)){
-            nextSpeed = (Vector2){main_speed, 0};
-        }
-        else if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)){
-            nextSpeed = (Vector2){0, main_speed};
-        }
-        else if(IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)){
-            nextSpeed = (Vector2){0, -main_speed};
-        }
 
-        float shrink = 2;
 
-        
-        bool moving_horizontally = fabsf(speed.x) > 0.0f;
-        bool requesting_horizontal = fabsf(nextSpeed.x) > 0.0f;
-        bool perpendicular_turn = (fabsf(speed.x) > 0.0f || fabsf(speed.y) > 0.0f) && (moving_horizontally != requesting_horizontal);
-                                  
-        float snap_tolerance = main_speed * dt + 0.01f;
-        bool at_turn_line = !perpendicular_turn || (moving_horizontally ? near_tile_line(position.x, 586.0f, snap_tolerance) : near_tile_line(position.y, 72.0f, snap_tolerance));
-                                 
-        if (at_turn_line) {
-            Vector2 turn_position = position;
-
-            if (perpendicular_turn) {
-                if (moving_horizontally) {
-                    turn_position.x = nearest_tile_line(position.x, 586.0f);
-                } else {
-                    turn_position.y = nearest_tile_line(position.y, 72.0f);
-                }
-            }
-
-            Rectangle turnBox = {
-                turn_position.x + nextSpeed.x * dt + shrink / 2,
-                turn_position.y + nextSpeed.y * dt + shrink / 2,
-                26 - shrink,
-                26 - shrink
-            };
-
-            if (!collision(turnBox, map)) {
-                position = turn_position;
-                speed = nextSpeed;
-            }
-        }
-
-        Rectangle collisionBox = {
-            position.x + speed.x * dt + shrink / 2,
-            position.y + speed.y * dt + shrink / 2,
-            26 - shrink,
-            26 - shrink
-        };
-        //pacman er position update
-        
-        
-        if(!collision(collisionBox, map)){
-            
-            
-            position.x += speed.x*dt;
-            position.y += speed.y*dt;
-            
-        }
-        else {
-            speed = (Vector2){0, 0};
-        }
-        
-        pacman= (Rectangle){position.x,position.y,24,24};
-        //dot collection
-            
-        //pacman er center khuje tiles number ber kora
-        int tile_j = (int)((position.x + 12 - 586) / 26);
-        int tile_i = (int)((position.y + 12 - 72) / 26);
-
-        if (tile_i >= 0 && tile_i < htiles && tile_j >= 0 && tile_j < wtiles) {
-            if (map[tile_i][tile_j] == 'd') {
-                map[tile_i][tile_j] = 'e'; 
-                score += 10;
-                PlaySound(dot_sound);
-            } 
-            else if (map[tile_i][tile_j] == 'b') {
-                map[tile_i][tile_j] = 'e'; 
-                score += 50;
-                PlaySound(big_dot_sound);
-
-                phase=frightened;
-                flip_dir(&blinky_ghost);
-                flip_dir(&pinky_ghost);
-                flip_dir(&inky_ghost);
-                flip_dir(&clyde_ghost);
-            }
-        }
-
-        
-       if(tile_i == 14){
-            if(position.x < 564){
-                position.x = 1288;
-            }
-            else if(position.x > 1288){
-                position.x = 564;
-            }
-        }
-        else{
-            if(position.x < 612){
-                position.x = 612;
-            }
-            else if(position.x > 1262){
-                position.x=1262;
-            }
-        }
-
-        if(position.y < 98){
-            position.y = 98;
-        }
-        else if(position.y > 826){
-            position.y = 826;
-        }
-        
         Rectangle ghost_rec_blinky=g_rec(&blinky_ghost,blinky);
         Rectangle ghost_rec_pinky=g_rec(&pinky_ghost,pinky);
         Rectangle ghost_rec_inky=g_rec(&inky_ghost,inky);
         Rectangle ghost_rec_clyde=g_rec(&clyde_ghost,clyde);
         
-        
-        
-        if(!over && !level_complete){
-            if(phase == scattered){
-                if(scattered_time<10.0f){
-                    
-                    tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
-                    tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
-                    tile ghost_tile_inky = tiles_no(inky_ghost.position);
-                    tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
+        float dt= GetFrameTime();
 
-                    Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
-                    Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
-                    Vector2 inky_tile_position =pixel(ghost_tile_inky);
-                    Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
+        if (IsKeyPressed(KEY_ESCAPE) && !over && !level_complete) {
+            paused = !paused;
+        }
 
-                    if (fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f) 
-                    {
-                        blinky_scatter_alg(&blinky_ghost);
-                    }
-                    if (fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f)  
-                    {
-                        pinky_scatter_alg(&pinky_ghost);
-                    }
 
-                    if (fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f)  
-                    {
-                        inky_scatter_alg(&inky_ghost);
+        if(!paused){
+            
+            //pacman er movement:
+            if(IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)){
+                nextSpeed = (Vector2){-main_speed, 0};
+            }
+            else if(IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)){
+                nextSpeed = (Vector2){main_speed, 0};
+            }
+            else if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)){
+                nextSpeed = (Vector2){0, main_speed};
+            }
+            else if(IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)){
+                nextSpeed = (Vector2){0, -main_speed};
+            }
+
+            float shrink = 2;
+
+            
+            bool moving_horizontally = fabsf(speed.x) > 0.0f;
+            bool requesting_horizontal = fabsf(nextSpeed.x) > 0.0f;
+            bool perpendicular_turn = (fabsf(speed.x) > 0.0f || fabsf(speed.y) > 0.0f) && (moving_horizontally != requesting_horizontal);
+                                    
+            float snap_tolerance = main_speed * dt + 0.01f;
+            bool at_turn_line = !perpendicular_turn || (moving_horizontally ? near_tile_line(position.x, 586.0f, snap_tolerance) : near_tile_line(position.y, 72.0f, snap_tolerance));
+                                    
+            if (at_turn_line) {
+                Vector2 turn_position = position;
+
+                if (perpendicular_turn) {
+                    if (moving_horizontally) {
+                        turn_position.x = nearest_tile_line(position.x, 586.0f);
+                    } else {
+                        turn_position.y = nearest_tile_line(position.y, 72.0f);
                     }
-                    if (fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f)  
-                    {
-                        clyde_scatter_alg(&clyde_ghost);
-                    }
-                        
-                    
-                    scattered_time+=dt;
                 }
-                else{
-                    phase = chase;
-                    scattered_time = 0.0f;
-                    chase_time = 0.0f;
+
+                Rectangle turnBox = {
+                    turn_position.x + nextSpeed.x * dt + shrink / 2,
+                    turn_position.y + nextSpeed.y * dt + shrink / 2,
+                    26 - shrink,
+                    26 - shrink
+                };
+
+                if (!collision(turnBox, map)) {
+                    position = turn_position;
+                    speed = nextSpeed;
                 }
+            }
+
+            Rectangle collisionBox = {
+                position.x + speed.x * dt + shrink / 2,
+                position.y + speed.y * dt + shrink / 2,
+                26 - shrink,
+                26 - shrink
+            };
+            //pacman er position update
+            
+            
+            if(!collision(collisionBox, map)){
+                
+                
+                position.x += speed.x*dt;
+                position.y += speed.y*dt;
                 
             }
-        
-        
-            Vector2 pacpos={position.x,position.y};
-        
-
-        
-            if(phase == chase){
-                if(chase_time<20.0f){
-                    
-                    tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
-                    tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
-                    tile ghost_tile_inky = tiles_no(inky_ghost.position);
-                    tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
-
-                    Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
-                    Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
-                    Vector2 inky_tile_position =pixel(ghost_tile_inky);
-                    Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
-
-                    if (fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f)
-                    {
-                        
-                        
-                        blinky_chase_alg(&blinky_ghost, pacpos);
-                        
-                    }
-                    if (fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f)
-                    {
-                        
-                        
-                        pinky_chase_alg(&pinky_ghost, pacpos, speed);
-                        
-                    }
-
-                    if (fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f)
-                    {
-                        
-                        
-                        inky_chase_alg(&inky_ghost, &blinky_ghost, pacpos, speed);
-                        
-                    }
-                    if (fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f)
-                    {
-                        
-                        
-                        clyde_chase_alg(&clyde_ghost, pacpos);
-                        
-                    }
-                        
-                    
-                    chase_time += dt;
-                }
-                else{
-                    phase = scattered;
-                    scattered_time = 0.0f;
-                    chase_time = 0.0f;
-                }
-                
+            else {
+                speed = (Vector2){0, 0};
             }
-        
-        
-            if (phase == frightened){
-                if (CheckCollisionRecs(pacman, ghost_rec_blinky) && !blinky_ghost.eaten && !blinky_ghost.ignore_frightened) {
-                    
-                    blinky_ghost.eaten = true;
-                    PlaySound(ghost_eaten_sound);
-                    score += 200;
-                }
-
-                if (CheckCollisionRecs(pacman, ghost_rec_pinky) && !pinky_ghost.eaten && !pinky_ghost.ignore_frightened) {
-                    
-                    pinky_ghost.eaten = true;
-                    PlaySound(ghost_eaten_sound);
-                    score += 200;
-                }
-                if (CheckCollisionRecs(pacman, ghost_rec_inky) && !inky_ghost.eaten && !inky_ghost.ignore_frightened) {
-                    
-                    inky_ghost.eaten = true;
-                    PlaySound(ghost_eaten_sound);
-                    score += 200;
-                }
-                if (CheckCollisionRecs(pacman, ghost_rec_clyde) && !clyde_ghost.eaten && !clyde_ghost.ignore_frightened) {
-                    
-                    clyde_ghost.eaten = true;
-                    PlaySound(ghost_eaten_sound);
-                    score += 200;
-                }
-
+            
+            pacman= (Rectangle){position.x,position.y,24,24};
+            //dot collection
                 
-                frightened_time += dt;
+            //pacman er center khuje tiles number ber kora
+            int tile_j = (int)((position.x + 12 - 586) / 26);
+            int tile_i = (int)((position.y + 12 - 72) / 26);
 
-                tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
-                tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
-                tile ghost_tile_inky = tiles_no(inky_ghost.position);
-                tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
+            if (tile_i >= 0 && tile_i < htiles && tile_j >= 0 && tile_j < wtiles) {
+                if (map[tile_i][tile_j] == 'd') {
+                    map[tile_i][tile_j] = 'e'; 
+                    score += 10;
+                    PlaySound(dot_sound);
+                } 
+                else if (map[tile_i][tile_j] == 'b') {
+                    map[tile_i][tile_j] = 'e'; 
+                    score += 50;
+                    PlaySound(big_dot_sound);
 
-                Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
-                Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
-                Vector2 inky_tile_position =pixel(ghost_tile_inky);
-                Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
-
-                bool at_tile_blinky =fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f;
-                    
-                bool at_tile_pinky = fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f;
-
-                bool at_tile_inky = fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f;
-
-                bool at_tile_clyde = fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f;
-                    
-                    
-
-                if (!blinky_ghost.eaten && at_tile_blinky && !blinky_ghost.ignore_frightened ) {
-                    ghost_frightened(&blinky_ghost);
-                    
-                    
-                }
-                if (!pinky_ghost.eaten && at_tile_pinky && !pinky_ghost.ignore_frightened) {
-                    ghost_frightened(&pinky_ghost);
-                    
-                    
-                }
-                if (!inky_ghost.eaten && at_tile_inky && !inky_ghost.ignore_frightened) {
-                    ghost_frightened(&inky_ghost);
-                    
-                    
-                }
-                if (!clyde_ghost.eaten && at_tile_clyde && !clyde_ghost.ignore_frightened) {
-                    ghost_frightened(&clyde_ghost);
-                    
-                    
-                }
-
-
-                if (frightened_time >6.0f) {
-                    phase = chase;
+                    phase=frightened;
                     frightened_time = 0.0f;
-                    chase_time = 0.0f;
+                    if (!blinky_ghost.eaten) {
+                        blinky_ghost.ignore_frightened = false;
+                        flip_dir(&blinky_ghost);
+                    }
 
-                    blinky_ghost.ignore_frightened = false;
-                    pinky_ghost.ignore_frightened = false;
-                    inky_ghost.ignore_frightened = false;
-                    clyde_ghost.ignore_frightened = false;
+                    if (!pinky_ghost.eaten) {
+                        pinky_ghost.ignore_frightened = false;
+                        flip_dir(&pinky_ghost);
+                    }
+
+                    if (!inky_ghost.eaten) {
+                        inky_ghost.ignore_frightened = false;
+                        flip_dir(&inky_ghost);
+                    }
+
+                    if (!clyde_ghost.eaten) {
+                        clyde_ghost.ignore_frightened = false;
+                        flip_dir(&clyde_ghost);
+                    }
                 }
-                
             }
-            /*if (phase == eaten) {
-                tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
-                tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
-                tile ghost_tile_inky = tiles_no(inky_ghost.position);
-                tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
 
-                Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
-                Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
-                Vector2 inky_tile_position =pixel(ghost_tile_inky);
-                Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
-                
-                bool at_tile_blinky = fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f;
+            
+        if(tile_i == 14){
+                if(position.x < 564){
+                    position.x = 1288;
+                }
+                else if(position.x > 1288){
+                    position.x = 564;
+                }
+            }
+            else{
+                if(position.x < 612){
+                    position.x = 612;
+                }
+                else if(position.x > 1262){
+                    position.x=1262;
+                }
+            }
 
-                bool at_tile_pinky = fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f;
+            if(position.y < 98){
+                position.y = 98;
+            }
+            else if(position.y > 826){
+                position.y = 826;
+            }
+            
+            
+            
+            
+            
+            if(!over && !level_complete){
+                if(phase == scattered){
+                    if(scattered_time<10.0f){
+                        
+                        tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
+                        tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
+                        tile ghost_tile_inky = tiles_no(inky_ghost.position);
+                        tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
 
-                bool at_tile_inky = fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f;
+                        Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
+                        Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
+                        Vector2 inky_tile_position =pixel(ghost_tile_inky);
+                        Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
 
-                bool at_tile_clyde = fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f;
+                        if (fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f) 
+                        {
+                            blinky_scatter_alg(&blinky_ghost);
+                        }
+                        if (fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f)  
+                        {
+                            pinky_scatter_alg(&pinky_ghost);
+                        }
+
+                        if (fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f)  
+                        {
+                            inky_scatter_alg(&inky_ghost);
+                        }
+                        if (fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f)  
+                        {
+                            clyde_scatter_alg(&clyde_ghost);
+                        }
+                            
+                        
+                        scattered_time+=dt;
+                    }
+                    else{
+                        phase = chase;
+                        scattered_time = 0.0f;
+                        chase_time = 0.0f;
+                    }
                     
+                }
+            
+            
+                Vector2 pacpos={position.x,position.y};
+            
 
-                if (at_tile_blinky) {
-                    eaten_phase_blinky(&blinky_ghost); 
-                }
+            
+                if(phase == chase){
+                    if(chase_time<20.0f){
+                        
+                        tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
+                        tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
+                        tile ghost_tile_inky = tiles_no(inky_ghost.position);
+                        tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
 
-                if (at_tile_pinky) {
-                    eaten_phase_pinky(&pinky_ghost); 
-                }
+                        Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
+                        Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
+                        Vector2 inky_tile_position =pixel(ghost_tile_inky);
+                        Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
 
-                if (at_tile_inky) {
-                    eaten_phase_inky(&inky_ghost); 
+                        if (fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f)
+                        {
+                            
+                            
+                            blinky_chase_alg(&blinky_ghost, pacpos);
+                            
+                        }
+                        if (fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f)
+                        {
+                            
+                            
+                            pinky_chase_alg(&pinky_ghost, pacpos, speed);
+                            
+                        }
+
+                        if (fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f)
+                        {
+                            
+                            
+                            inky_chase_alg(&inky_ghost, &blinky_ghost, pacpos, speed);
+                            
+                        }
+                        if (fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f)
+                        {
+                            
+                            
+                            clyde_chase_alg(&clyde_ghost, pacpos);
+                            
+                        }
+                            
+                        
+                        chase_time += dt;
+                    }
+                    else{
+                        phase = scattered;
+                        scattered_time = 0.0f;
+                        chase_time = 0.0f;
+                    }
+                    
                 }
-                if (at_tile_clyde) {
-                    eaten_phase_clyde(&clyde_ghost); 
+            
+            
+                if (phase == frightened){
+                    if (CheckCollisionRecs(pacman, ghost_rec_blinky) && !blinky_ghost.eaten && !blinky_ghost.ignore_frightened) {
+                        
+                        blinky_ghost.eaten = true;
+                        PlaySound(ghost_eaten_sound);
+                        score += 200;
+                    }
+
+                    if (CheckCollisionRecs(pacman, ghost_rec_pinky) && !pinky_ghost.eaten && !pinky_ghost.ignore_frightened) {
+                        
+                        pinky_ghost.eaten = true;
+                        PlaySound(ghost_eaten_sound);
+                        score += 200;
+                    }
+                    if (CheckCollisionRecs(pacman, ghost_rec_inky) && !inky_ghost.eaten && !inky_ghost.ignore_frightened) {
+                        
+                        inky_ghost.eaten = true;
+                        PlaySound(ghost_eaten_sound);
+                        score += 200;
+                    }
+                    if (CheckCollisionRecs(pacman, ghost_rec_clyde) && !clyde_ghost.eaten && !clyde_ghost.ignore_frightened) {
+                        
+                        clyde_ghost.eaten = true;
+                        PlaySound(ghost_eaten_sound);
+                        score += 200;
+                    }
+
+                    
+                    frightened_time += dt;
+
+                    tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
+                    tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
+                    tile ghost_tile_inky = tiles_no(inky_ghost.position);
+                    tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
+
+                    Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
+                    Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
+                    Vector2 inky_tile_position =pixel(ghost_tile_inky);
+                    Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
+
+                    bool at_tile_blinky =fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f;
+                        
+                    bool at_tile_pinky = fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f;
+
+                    bool at_tile_inky = fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f;
+
+                    bool at_tile_clyde = fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f;
+                        
+                        
+
+                    if (!blinky_ghost.eaten && at_tile_blinky && !blinky_ghost.ignore_frightened ) {
+                        ghost_frightened(&blinky_ghost);
+                        
+                        
+                    }
+                    if (!pinky_ghost.eaten && at_tile_pinky && !pinky_ghost.ignore_frightened) {
+                        ghost_frightened(&pinky_ghost);
+                        
+                        
+                    }
+                    if (!inky_ghost.eaten && at_tile_inky && !inky_ghost.ignore_frightened) {
+                        ghost_frightened(&inky_ghost);
+                        
+                        
+                    }
+                    if (!clyde_ghost.eaten && at_tile_clyde && !clyde_ghost.ignore_frightened) {
+                        ghost_frightened(&clyde_ghost);
+                        
+                        
+                    }
+
+
+                    if (frightened_time >6.0f) {
+                        phase = chase;
+                        frightened_time = 0.0f;
+                        chase_time = 0.0f;
+
+                        blinky_ghost.ignore_frightened = false;
+                        pinky_ghost.ignore_frightened = false;
+                        inky_ghost.ignore_frightened = false;
+                        clyde_ghost.ignore_frightened = false;
+                    }
+                    
                 }
-                if (ghost_tile_blinky.row == 11 && ghost_tile_blinky.col == 13 ) {
-                    phase = chase;      
-                    chase_time = 0.0f;  
-                    scattered_time = 0.0f; 
-                }
-                if (ghost_tile_pinky.row == 11 && ghost_tile_pinky.col == 12) {
-                    phase = chase;      
-                    chase_time = 0.0f;  
-                    scattered_time = 0.0f; 
-                }
-                if (ghost_tile_inky.row == 11 && ghost_tile_inky.col == 15) {
-                    phase = chase;      
-                    chase_time = 0.0f;  
-                    scattered_time = 0.0f; 
-                }
-                if (ghost_tile_clyde.row == 11 && ghost_tile_clyde.col == 14) {
-                    phase = chase;      
-                    chase_time = 0.0f;  
-                    scattered_time = 0.0f; 
-                }
-                
-            }*/
+                /*if (phase == eaten) {
+                    tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
+                    tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
+                    tile ghost_tile_inky = tiles_no(inky_ghost.position);
+                    tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
+
+                    Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
+                    Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
+                    Vector2 inky_tile_position =pixel(ghost_tile_inky);
+                    Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
+                    
+                    bool at_tile_blinky = fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f;
+
+                    bool at_tile_pinky = fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f;
+
+                    bool at_tile_inky = fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f;
+
+                    bool at_tile_clyde = fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f;
+                        
+
+                    if (at_tile_blinky) {
+                        eaten_phase_blinky(&blinky_ghost); 
+                    }
+
+                    if (at_tile_pinky) {
+                        eaten_phase_pinky(&pinky_ghost); 
+                    }
+
+                    if (at_tile_inky) {
+                        eaten_phase_inky(&inky_ghost); 
+                    }
+                    if (at_tile_clyde) {
+                        eaten_phase_clyde(&clyde_ghost); 
+                    }
+                    if (ghost_tile_blinky.row == 11 && ghost_tile_blinky.col == 13 ) {
+                        phase = chase;      
+                        chase_time = 0.0f;  
+                        scattered_time = 0.0f; 
+                    }
+                    if (ghost_tile_pinky.row == 11 && ghost_tile_pinky.col == 12) {
+                        phase = chase;      
+                        chase_time = 0.0f;  
+                        scattered_time = 0.0f; 
+                    }
+                    if (ghost_tile_inky.row == 11 && ghost_tile_inky.col == 15) {
+                        phase = chase;      
+                        chase_time = 0.0f;  
+                        scattered_time = 0.0f; 
+                    }
+                    if (ghost_tile_clyde.row == 11 && ghost_tile_clyde.col == 14) {
+                        phase = chase;      
+                        chase_time = 0.0f;  
+                        scattered_time = 0.0f; 
+                    }
+                    
+                }*/
+            
+            
+                if (blinky_ghost.eaten) {
+                    tile t = tiles_no(blinky_ghost.position);
+                    Vector2 tile_pos = pixel(t);
+
+                    bool at_tile = fabsf(blinky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(blinky_ghost.position.y - tile_pos.y) < 1.0f;
         
-        
-            if (blinky_ghost.eaten) {
-                tile t = tiles_no(blinky_ghost.position);
-                Vector2 tile_pos = pixel(t);
+                    if (at_tile) {
+                        blinky_ghost.position = tile_pos;
+                        eaten_phase_blinky(&blinky_ghost);
+                    }
 
-                bool at_tile = fabsf(blinky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(blinky_ghost.position.y - tile_pos.y) < 1.0f;
-      
-                if (at_tile) {
-                    blinky_ghost.position = tile_pos;
-                    eaten_phase_blinky(&blinky_ghost);
+                    movement(&blinky_ghost, ghost_eaten_speed * ghost_speed_multiplier);
+                    check_eaten_reset(&blinky_ghost, (tile){ 11, 13 });
+                }
+                else if (phase == frightened && !blinky_ghost.ignore_frightened) {
+                    movement(&blinky_ghost, ghost_frightended_speed * ghost_speed_multiplier);
+                }
+                else {
+                    movement(&blinky_ghost, ghost_normal_speed * ghost_speed_multiplier);
+                        
                 }
 
-                movement(&blinky_ghost, ghost_eaten_speed * ghost_speed_multiplier);
-                check_eaten_reset(&blinky_ghost, (tile){ 11, 13 });
-            }
-            else if (phase == frightened && !blinky_ghost.ignore_frightened) {
-                movement(&blinky_ghost, ghost_frightended_speed * ghost_speed_multiplier);
-            }
-            else {
-                movement(&blinky_ghost, ghost_normal_speed * ghost_speed_multiplier);
-                    
-            }
+                if (pinky_ghost.eaten) {
+                    tile t = tiles_no(pinky_ghost.position);
+                    Vector2 tile_pos = pixel(t);
 
-            if (pinky_ghost.eaten) {
-                tile t = tiles_no(pinky_ghost.position);
-                Vector2 tile_pos = pixel(t);
+                    bool at_tile =
+                        fabsf(pinky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(pinky_ghost.position.y - tile_pos.y) < 1.0f;
+                        
 
-                bool at_tile =
-                    fabsf(pinky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(pinky_ghost.position.y - tile_pos.y) < 1.0f;
-                    
+                    if (at_tile) {
+                        pinky_ghost.position = tile_pos;
+                        eaten_phase_pinky(&pinky_ghost);
+                    }
 
-                if (at_tile) {
-                    pinky_ghost.position = tile_pos;
-                    eaten_phase_pinky(&pinky_ghost);
+                    movement(&pinky_ghost, ghost_eaten_speed * ghost_speed_multiplier);
+                    check_eaten_reset(&pinky_ghost, (tile){ 11, 12});
+                }
+                else if (phase == frightened && !pinky_ghost.ignore_frightened) {
+                    movement(&pinky_ghost, ghost_frightended_speed * ghost_speed_multiplier);
+                }
+                else {
+                    movement(&pinky_ghost, ghost_normal_speed * ghost_speed_multiplier);
+                        
                 }
 
-                movement(&pinky_ghost, ghost_eaten_speed * ghost_speed_multiplier);
-                check_eaten_reset(&pinky_ghost, (tile){ 11, 12});
-            }
-            else if (phase == frightened && !pinky_ghost.ignore_frightened) {
-                movement(&pinky_ghost, ghost_frightended_speed * ghost_speed_multiplier);
-            }
-            else {
-                movement(&pinky_ghost, ghost_normal_speed * ghost_speed_multiplier);
-                    
-            }
+            if (inky_ghost.eaten) {
+                    tile t = tiles_no(inky_ghost.position);
+                    Vector2 tile_pos = pixel(t);
 
-           if (inky_ghost.eaten) {
-                tile t = tiles_no(inky_ghost.position);
-                Vector2 tile_pos = pixel(t);
+                    bool at_tile =
+                        fabsf(inky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(inky_ghost.position.y - tile_pos.y) < 1.0f;
+                        
 
-                bool at_tile =
-                    fabsf(inky_ghost.position.x - tile_pos.x) < 1.0f && fabsf(inky_ghost.position.y - tile_pos.y) < 1.0f;
-                    
+                    if (at_tile) {
+                        inky_ghost.position = tile_pos;
+                        eaten_phase_inky(&inky_ghost);
+                    }
 
-                if (at_tile) {
-                    inky_ghost.position = tile_pos;
-                    eaten_phase_inky(&inky_ghost);
+                    movement(&inky_ghost, ghost_eaten_speed * ghost_speed_multiplier);
+                    check_eaten_reset(&inky_ghost, (tile){ 11, 15 });
+                }
+                else if (phase == frightened && !inky_ghost.ignore_frightened) {
+                    movement(&inky_ghost, ghost_frightended_speed * ghost_speed_multiplier);
+                }
+                else {
+                    movement(&inky_ghost, ghost_normal_speed * ghost_speed_multiplier);
+                        
                 }
 
-                movement(&inky_ghost, ghost_eaten_speed * ghost_speed_multiplier);
-                check_eaten_reset(&inky_ghost, (tile){ 11, 15 });
-            }
-            else if (phase == frightened && !inky_ghost.ignore_frightened) {
-                movement(&inky_ghost, ghost_frightended_speed * ghost_speed_multiplier);
-            }
-            else {
-                movement(&inky_ghost, ghost_normal_speed * ghost_speed_multiplier);
-                    
-            }
+                if (clyde_ghost.eaten) {
+                    tile t = tiles_no(clyde_ghost.position);
+                    Vector2 tile_pos = pixel(t);
 
-            if (clyde_ghost.eaten) {
-                tile t = tiles_no(clyde_ghost.position);
-                Vector2 tile_pos = pixel(t);
+                    bool at_tile =
+                        fabsf(clyde_ghost.position.x - tile_pos.x) < 1.0f && fabsf(clyde_ghost.position.y - tile_pos.y) < 1.0f;
+                        
 
-                bool at_tile =
-                    fabsf(clyde_ghost.position.x - tile_pos.x) < 1.0f && fabsf(clyde_ghost.position.y - tile_pos.y) < 1.0f;
-                    
+                    if (at_tile) {
+                        clyde_ghost.position = tile_pos;
+                        eaten_phase_clyde(&clyde_ghost);
+                    }
 
-                if (at_tile) {
-                    clyde_ghost.position = tile_pos;
-                    eaten_phase_clyde(&clyde_ghost);
+                    movement(&clyde_ghost, ghost_eaten_speed * ghost_speed_multiplier);
+                    check_eaten_reset(&clyde_ghost, (tile){ 11, 14 });
                 }
-
-                movement(&clyde_ghost, ghost_eaten_speed * ghost_speed_multiplier);
-                check_eaten_reset(&clyde_ghost, (tile){ 11, 14 });
-            }
-            else if (phase == frightened && !clyde_ghost.ignore_frightened) {
-                movement(&clyde_ghost, ghost_frightended_speed * ghost_speed_multiplier);
-            }
-            else {
-                movement(&clyde_ghost, ghost_normal_speed * ghost_speed_multiplier);
-                    
+                else if (phase == frightened && !clyde_ghost.ignore_frightened) {
+                    movement(&clyde_ghost, ghost_frightended_speed * ghost_speed_multiplier);
+                }
+                else {
+                    movement(&clyde_ghost, ghost_normal_speed * ghost_speed_multiplier);
+                        
+                }
             }
         }
 
@@ -1234,8 +1263,6 @@ int main(){
                     break;
                 }
                 
-            
-
                 Rectangle dest = {586+j*26, 72+i*26, 26, 26};
                 if (wall_map != NULL) {
                     Rectangle source = {1, 1, (float)wall_map->width - 2, (float)wall_map->height - 2};
@@ -1289,9 +1316,7 @@ int main(){
                     over=true;
                     PlaySound(game_over_sound);
                     if (!leaderboard_saved) {
-                        SaveLeaderboard(leaderboard, &leaderboard_count, player_name,
-                                        score, minute * 60 + second,
-                                        selected_difficulty);
+                        SaveLeaderboard(leaderboard, &leaderboard_count, player_name, score, minute * 60 + second, selected_difficulty);                
                         leaderboard_saved = true;
                     }
                     
@@ -1333,11 +1358,7 @@ int main(){
         }
         
         
-        if(over){
-            DrawText("Game Over", 898, 514,26, RED);
-            nextSpeed=( Vector2){0,0};
-            
-        }
+        
 
         //DrawRectangleRec(pacman, YELLOW);
         int frame = ((int)(GetTime() * 10)) % 3;
@@ -1473,18 +1494,44 @@ int main(){
             draw_eaten_ghost_sprite(eaten_ghost_up,eaten_ghost_down, eaten_ghost_right, eaten_ghost_left, clyde_ghost);
         }
 
+        if (paused) {
+            DrawRectangle(650, 280, 600, 410, Fade(BLACK, 0.85f));
+            DrawRectangleLinesEx((Rectangle){ 650, 280, 600, 410 }, 2.0f, YELLOW);
+
+            DrawText("PAUSED", 860, 320, 42, YELLOW);
+
+            if (menu_button((Rectangle){ 760, 400, 380, 52 },"Resume", 17, menu_hover_sound, menu_click_sound)) {
+                            
+                paused = false;
+            }
+
+            if (menu_button((Rectangle){ 760, 470, 380, 52 },"Main Menu", 18, menu_hover_sound, menu_click_sound)) {
+                            
+                return_to_menu = true;
+                
+            }
+
+            if (menu_button((Rectangle){ 760, 540, 380, 52 },"Quit", 19, menu_hover_sound, menu_click_sound)) {
+                            
+                quit_requested = true;
+            }
+
+            DrawText("Press ESC to resume", 837, 620, 20, LIGHTGRAY);
+        }
+
         
         if (over || level_complete) {
-            DrawRectangle(700, 560, 500, 250, Fade(BLACK, 0.85f));
-            DrawRectangleLinesEx((Rectangle){ 700, 560, 500, 250 }, 2.0f, YELLOW);
-            DrawText(over ? "Game Over" : "Level Complete", 820, 580, 34,over ? RED : GREEN);
+            nextSpeed=( Vector2){0,0};
+            DrawRectangle(700, 560, 500, 210, Fade(BLACK, 0.85f));
+            DrawRectangleLinesEx((Rectangle){ 700, 560, 500, 210 }, 2.0f, YELLOW);
+            DrawText(over ? "Game Over" : "Level Complete", 855, 580, 34,over ? RED : GREEN);
                      
 
             
-            if (menu_button((Rectangle){ 760, 695, 380, 48 }, "Menu")) {
+            if (menu_button((Rectangle){ 760, 635, 380, 48 }, "Menu",15,menu_hover_sound,menu_click_sound)) {
                 return_to_menu = true;
             }
-            if (menu_button((Rectangle){ 760, 755, 380, 48 }, "Quit")) {
+            if (menu_button((Rectangle){ 760, 695, 380, 48 }, "Quit",16,menu_hover_sound,menu_click_sound)) {
                 quit_requested = true;
             }
         }
