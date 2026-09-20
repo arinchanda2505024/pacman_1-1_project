@@ -11,7 +11,7 @@
 #define wtiles 28
 #define htiles 31
 #define ghost_normal_speed 110.0f
-#define ghost_eaten_speed 110.0f
+#define ghost_eaten_speed 150.0f
 #define ghost_frightended_speed 70.0f
 
 extern char map[htiles][wtiles+1];
@@ -48,6 +48,7 @@ typedef struct
     int scatter_col;
     direction dir;
     bool eaten;
+    bool ignore_frightened;
 
 }ghost;
 
@@ -96,6 +97,7 @@ void eaten_phase_inky(ghost *g);
 void clyde_chase_alg(ghost *g,Vector2 pacpos);
 void eaten_phase_clyde(ghost *g);
 void clyde_scatter_alg(ghost *g);
+void check_eaten_reset(ghost *g, tile home);
 
 Rectangle g_rec(ghost *g,ghost_name name);
 Vector2 pixel(tile t);

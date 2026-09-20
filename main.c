@@ -18,13 +18,13 @@
 #define MAX_LEADERBOARD_ENTRIES 15
 
 typedef enum {
-    MENU_MAIN,
-    MENU_NAME_INPUT,
-    MENU_DIFFICULTY,
-    MENU_LEADERBOARD,
-    MENU_RULES,
-    MENU_ABOUT,
-    MENU_QUIT
+    menu_main,
+    menu_name_input,
+    menu_difficulty,
+    menu_leaderboard,
+    menu_rules,
+    menu_about,
+    menu_quit
 } MenuScreen;
 
 typedef struct {
@@ -98,7 +98,8 @@ static int LoadLeaderboard(LeaderboardEntry entries[MAX_LEADERBOARD_ENTRIES])
     FILE *file = fopen("leaderboard.txt", "r");
     int count = 0;
 
-    if (file == NULL) return 0;
+    if (file == NULL) 
+    return 0;
 
     while (count < MAX_LEADERBOARD_ENTRIES && fscanf(file, "%20s %d %d %d", entries[count].name,&entries[count].score, &entries[count].seconds,&entries[count].difficulty) == 4) {     
                   
@@ -113,9 +114,9 @@ static void SortLeaderboard(LeaderboardEntry entries[], int count)
 {
     for (int i = 0; i < count - 1; i++) {
         for (int j = i + 1; j < count; j++) {
-            bool swap = entries[j].score > entries[i].score ||
-                (entries[j].score == entries[i].score &&
-                 entries[j].seconds < entries[i].seconds);
+            bool swap = entries[j].score > entries[i].score || (entries[j].score == entries[i].score && entries[j].seconds < entries[i].seconds);
+                
+                 
             if (swap) {
                 LeaderboardEntry temp = entries[i];
                 entries[i] = entries[j];
@@ -162,7 +163,7 @@ static const char *DifficultyName(int difficulty)
     return "Normal";
 }
 
-/* Returns true when value can be safely snapped to a maze tile line. */
+
 static bool near_tile_line(float value, float origin, float tolerance)
 {
     float line = origin + roundf((value - origin) / 26.0f) * 26.0f;
@@ -211,12 +212,12 @@ const char map_easy[htiles][wtiles+1]=
     };
 
 const char map_normal[htiles][wtiles+1]=
-    {"cssssssssssssssssssssssssssa",//1
-     "tdddddddddvvddddvvdddddddddt",//2
-     "tbuwwwwwgdvvdugdvvduwwwwwgbt",//3
-     "tdvuwwwwrdprdvvdprdpwwwwgvdt",//4
-     "tdvvdddddddddvvdddddddddvvdt",//5
-     "tdprdugduwwgdvvduwwgdugdprdt",//6
+    {"cssssssssssssssssssssssssssa",//1done
+     "tdddddddddvvddddvvdddddddddt",//2done
+     "tbuwwwwwgdvvdugdvvduwwwwwgbt",//3done
+     "tdvuwwwwrdprdvvdprdpwwwwgvdt",//4done
+     "tdvvdddddddddvvdddddddddvvdt",//5done
+     "tdprdugduwwgdvvduwwgdugdprdt",//6done
      "tddddvvdveevdvvdveevdvvddddt",//7done
      "twwgdvvdpwwrdprdpwwrdvvduwwt",//8done
      "twwrdvvddddddddddddddvvdpwwt",//9done
@@ -239,9 +240,9 @@ const char map_normal[htiles][wtiles+1]=
      "tdpwwrdvuwwrdvvdpwwgvdpwwrdt",//26done
      "tddddddvvddddvvddddvvddddddt",//27done
      "tduwwgdvvduwwrpwwgdvvduwwgdt",//28done
-     "tdpwwrdvvdpwwwwwwrdvvdpwwrdt",//29
-     "tddddddvvddddddddddvvddddddt",//30
-     "lssssssssssssssssssssssssssf"//31
+     "tdpwwrdvvdpwwwwwwrdvvdpwwrdt",//29done
+     "tddddddvvddddddddddvvddddddt",//30done
+     "lssssssssssssssssssssssssssf"//31done
     };
 
 const char map_hard[htiles][wtiles+1]=
@@ -340,7 +341,7 @@ int main(){
 
     main_menu:
     bool paused = false;
-    MenuScreen menu_screen = MENU_MAIN;
+    MenuScreen menu_screen = menu_main;
     LeaderboardEntry leaderboard[MAX_LEADERBOARD_ENTRIES] = { 0 };
     int leaderboard_count = LoadLeaderboard(leaderboard);
     SortLeaderboard(leaderboard, leaderboard_count);
@@ -363,21 +364,21 @@ int main(){
 
         DrawText("PACMAN", 820, 100, 64, YELLOW);
 
-        if (menu_screen == MENU_MAIN) {
+        if (menu_screen == menu_main) {
             DrawText("Main Menu", 860, 190, 34, RAYWHITE);
 
             if (menu_button((Rectangle){ 760, 255, 380, 60 }, "Play",0,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_NAME_INPUT;
+                menu_screen = menu_name_input;
             }
             
             if (menu_button((Rectangle){ 760, 330, 380, 60 }, "Leaderboard",1,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_LEADERBOARD;
+                menu_screen = menu_leaderboard;
             }
             if (menu_button((Rectangle){ 760, 405, 380, 60 }, "Game Rules",2,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_RULES;
+                menu_screen = menu_rules;
             }
             if (menu_button((Rectangle){ 760, 480, 380, 60 }, "About Us",3,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_ABOUT;
+                menu_screen = menu_about;
             }
             if (menu_button((Rectangle){ 760, 555, 380, 60 }, "Quit",4,menu_hover_sound,menu_click_sound)) {
                 EndDrawing();
@@ -386,7 +387,7 @@ int main(){
                 return 0;
             }
         }
-        else if (menu_screen == MENU_NAME_INPUT) {
+        else if (menu_screen == menu_name_input) {
             DrawText("Enter your name", 810, 260, 36, RAYWHITE);
             DrawRectangle(700, 330, 500, 58, DARKBLUE);
             DrawRectangleLinesEx((Rectangle){ 700, 330, 500, 58 }, 2.0f, SKYBLUE);
@@ -407,13 +408,13 @@ int main(){
                 player_name[--player_name_length] = '\0';
             }
             if (IsKeyPressed(KEY_ENTER) && player_name_length > 0) {
-                menu_screen = MENU_DIFFICULTY;
+                menu_screen = menu_difficulty;
             }
             if (menu_button((Rectangle){ 760, 560, 380, 60 }, "Back",8,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_MAIN;
+                menu_screen = menu_main;
             }
         }
-        else if (menu_screen == MENU_DIFFICULTY) {
+        else if (menu_screen == menu_difficulty) {
             DrawText("Choose difficulty", 735, 220, 36, RAYWHITE);
             if (menu_button((Rectangle){ 760, 300, 380, 60 }, "Easy",5,menu_hover_sound,menu_click_sound)) {
                 selected_difficulty = 0;
@@ -428,10 +429,10 @@ int main(){
                 start_game = true;
             }
             if (menu_button((Rectangle){ 760, 560, 380, 60 }, "Back",8,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_MAIN;
+                menu_screen = menu_main;
             }
         }
-        else if (menu_screen == MENU_LEADERBOARD) {
+        else if (menu_screen ==menu_leaderboard) {
             DrawText("Leaderboard", 822, 185, 40, YELLOW);
             if (menu_button((Rectangle){ 590, 255, 210, 55 }, "Easy",9,menu_hover_sound,menu_click_sound)) {
                 leaderboard_difficulty = 0;
@@ -468,10 +469,10 @@ int main(){
                          
             }
             if (menu_button((Rectangle){ 760, 850, 380, 60 }, "Back",12,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_MAIN;
+                menu_screen = menu_main;
             }
         }
-        else if (menu_screen == MENU_RULES) {
+        else if (menu_screen == menu_rules) {
             DrawText("Game Rules", 838, 195, 40, YELLOW);
             DrawText("-Eat every dot to finish the level.", 670, 290, 28, RAYWHITE);
             DrawText("-Avoid ghosts unless they are frightened.", 670, 335, 28, RAYWHITE);
@@ -479,10 +480,10 @@ int main(){
             DrawText("-Power pellets make ghosts frightened for a short time.", 670, 425, 28, RAYWHITE);
             DrawText("-Use arrow keys or W A S D to move.", 670, 470, 28, RAYWHITE);
             if (menu_button((Rectangle){ 760, 600, 380, 60 }, "Back",13,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_MAIN;
+                menu_screen = menu_main;
             }
         }
-        else if (menu_screen == MENU_ABOUT) {
+        else if (menu_screen == menu_about) {
             DrawText("About Us", 860, 220, 40, YELLOW);
             
             const char *about_text ="We are presenting our Level-1/Term-1 (L1T1) group project. We have recreated one of\n\n"
@@ -497,7 +498,7 @@ int main(){
             DrawText(about_text, 420, 300, 22, RAYWHITE);
             
             if (menu_button((Rectangle){ 760, 750, 380, 60 }, "Back",14,menu_hover_sound,menu_click_sound)) {
-                menu_screen = MENU_MAIN;
+                menu_screen = menu_main;
             }
         }
         
@@ -567,7 +568,7 @@ int main(){
     float chase_time=0.0f;
     float frightened_time=0.0f;
     float eaten_time=0.0f;
-    int time=5;
+    
     
 
     
@@ -712,7 +713,7 @@ int main(){
         Rectangle ghost_rec_pinky=g_rec(&pinky_ghost,pinky);
         Rectangle ghost_rec_inky=g_rec(&inky_ghost,inky);
         Rectangle ghost_rec_clyde=g_rec(&clyde_ghost,clyde);
-        
+
         float dt= GetFrameTime();
 
         if (IsKeyPressed(KEY_ESCAPE) && !over && !level_complete) {
@@ -1048,62 +1049,7 @@ int main(){
                     }
                     
                 }
-                /*if (phase == eaten) {
-                    tile ghost_tile_blinky = tiles_no(blinky_ghost.position);
-                    tile ghost_tile_pinky = tiles_no(pinky_ghost.position);
-                    tile ghost_tile_inky = tiles_no(inky_ghost.position);
-                    tile ghost_tile_clyde = tiles_no(clyde_ghost.position);
-
-                    Vector2 blinky_tile_position =pixel(ghost_tile_blinky);
-                    Vector2 pinky_tile_position =pixel(ghost_tile_pinky);
-                    Vector2 inky_tile_position =pixel(ghost_tile_inky);
-                    Vector2 clyde_tile_position =pixel(ghost_tile_clyde);
-                    
-                    bool at_tile_blinky = fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f;
-
-                    bool at_tile_pinky = fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f;
-
-                    bool at_tile_inky = fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f;
-
-                    bool at_tile_clyde = fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f;
-                        
-
-                    if (at_tile_blinky) {
-                        eaten_phase_blinky(&blinky_ghost); 
-                    }
-
-                    if (at_tile_pinky) {
-                        eaten_phase_pinky(&pinky_ghost); 
-                    }
-
-                    if (at_tile_inky) {
-                        eaten_phase_inky(&inky_ghost); 
-                    }
-                    if (at_tile_clyde) {
-                        eaten_phase_clyde(&clyde_ghost); 
-                    }
-                    if (ghost_tile_blinky.row == 11 && ghost_tile_blinky.col == 13 ) {
-                        phase = chase;      
-                        chase_time = 0.0f;  
-                        scattered_time = 0.0f; 
-                    }
-                    if (ghost_tile_pinky.row == 11 && ghost_tile_pinky.col == 12) {
-                        phase = chase;      
-                        chase_time = 0.0f;  
-                        scattered_time = 0.0f; 
-                    }
-                    if (ghost_tile_inky.row == 11 && ghost_tile_inky.col == 15) {
-                        phase = chase;      
-                        chase_time = 0.0f;  
-                        scattered_time = 0.0f; 
-                    }
-                    if (ghost_tile_clyde.row == 11 && ghost_tile_clyde.col == 14) {
-                        phase = chase;      
-                        chase_time = 0.0f;  
-                        scattered_time = 0.0f; 
-                    }
-                    
-                }*/
+                
             
             
                 if (blinky_ghost.eaten) {
@@ -1351,9 +1297,9 @@ int main(){
             PlaySound(game_finish_sound);
         }
         if (level_complete) {
-            DrawText("You passed the level!", 800, 50, 26, GREEN);
+            DrawText("You passed the level!", 840, 30, 26, GREEN);
             nextSpeed=(Vector2){0.0f,0.0f};
-            DrawText(TextFormat("Player: %s   Difficulty: %s", player_name,DifficultyName(selected_difficulty)),760, 82, 22, RAYWHITE);
+            //DrawText(TextFormat("Player: %s   Difficulty: %s", player_name,DifficultyName(selected_difficulty)),760, 82, 22, RAYWHITE);
                 
         }
         
@@ -1598,7 +1544,6 @@ int main(){
     
     
 
-
     UnloadSound(dot_sound);
     UnloadSound(big_dot_sound);
     UnloadSound(ghost_eaten_sound);
@@ -1606,8 +1551,6 @@ int main(){
     UnloadSound(game_over_sound);
     UnloadSound(game_finish_sound);
     
-
-
     if (return_to_menu) {
         return_to_menu = false;
         goto main_menu;
