@@ -451,7 +451,7 @@ void movement(ghost *g,float speed){
     
 }
 
-int random;
+
 
 void flip_dir(ghost *g){
 
@@ -574,8 +574,39 @@ void eaten_phase_clyde(ghost *g){
 void check_eaten_reset(ghost *g, tile home) {
     tile t = tiles_no(g->position);
     if (g->eaten && t.row == home.row && t.col == home.col) {
+        g->position = pixel(home);
         g->eaten = false;
         g->ignore_frightened = true;
+        g->dir = up;
+    }
+}
+
+void ghost_sprite(Texture *g_sprite,int n, char *address){
+    for(int i=0; i<n; i++){
+        char path[100];
+        sprintf(path, "assets\\ghost_sprite\\%s_%d.png", address,i+1);
+        g_sprite[i] = LoadTexture(path);
+    }
+}
+
+void draw_ghost_sprite(Texture *g_sprite, ghost g, int frame){
+    
+    DrawTexture(g_sprite[frame],(int)g.position.x,(int)g.position.y,WHITE);
+
+}
+
+void draw_eaten_ghost_sprite(Texture sprite_up,Texture sprite_down, Texture sprite_right, Texture sprite_left,ghost g){
+    if(g.dir == up){
+        DrawTexture(sprite_up,g.position.x, g.position.y , WHITE);
+    }
+    else if(g.dir == down){
+        DrawTexture(sprite_down,g.position.x, g.position.y , WHITE);
+    }
+    else if(g.dir == right){
+        DrawTexture(sprite_right,g.position.x, g.position.y , WHITE);
+    }
+    else if(g.dir == left){
+        DrawTexture(sprite_left,g.position.x, g.position.y , WHITE);
     }
 }
 

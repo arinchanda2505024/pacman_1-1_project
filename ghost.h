@@ -11,7 +11,7 @@
 #define wtiles 28
 #define htiles 31
 #define ghost_normal_speed 110.0f
-#define ghost_eaten_speed 150.0f
+#define ghost_eaten_speed 190.0f
 #define ghost_frightended_speed 70.0f
 
 extern char map[htiles][wtiles+1];
@@ -37,7 +37,6 @@ typedef enum{
     right,
     left
 }direction;
-
 
 typedef struct 
 {
@@ -98,6 +97,9 @@ void clyde_chase_alg(ghost *g,Vector2 pacpos);
 void eaten_phase_clyde(ghost *g);
 void clyde_scatter_alg(ghost *g);
 void check_eaten_reset(ghost *g, tile home);
+void draw_eaten_ghost_sprite(Texture sprite_up,Texture sprite_down, Texture sprite_right, Texture sprite_left,ghost g);
+void draw_ghost_sprite(Texture *g_sprite, ghost g, int frame);
+void ghost_sprite(Texture *g_sprite,int n, char *address);
 
 Rectangle g_rec(ghost *g,ghost_name name);
 Vector2 pixel(tile t);
