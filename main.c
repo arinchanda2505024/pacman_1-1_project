@@ -757,7 +757,7 @@ int main(){
                 }
             }
 
-            
+        //portal er logic
         if(tile_i == 14){
                 if(position.x < 570){
                     position.x = 1305;
