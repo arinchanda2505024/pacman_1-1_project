@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include "raymath.h"
+#include "game_config.h"
 
 
 
@@ -84,15 +85,15 @@ bool wall(tile t){
 
 tile tiles_no(Vector2 position){
     tile t;
-    t.col=(position.x-ghost_map_x)/tiles_size;
-    t.row=(position.y-ghost_map_y)/tiles_size;
+    t.col=(position.x-map_x)/tiles_size;
+    t.row=(position.y-map_y)/tiles_size;
     return t;
 }
 
 Vector2 pixel(tile t){
     Vector2 p;
-    p.x=ghost_map_x+ tiles_size*t.col+1;
-    p.y=ghost_map_y + tiles_size*t.row+1;
+    p.x = map_x+ tiles_size*t.col+1;
+    p.y = map_y + tiles_size*t.row+1;
     return p;
 }
 
@@ -102,6 +103,8 @@ void blinky_chase_alg(ghost *g,Vector2 pacpos){
     bool w = wall(t);
     
     float check1,check2,check3,check4; 
+
+    //check1 for up, 2 for down, 3 for right, 4 for left
         
       if(g->dir == up){
         t.row-=1;
@@ -365,11 +368,11 @@ void clyde_chase_alg(ghost *g,Vector2 pacpos){
         blinky_chase_alg(g,pacpos);
     }
     else if(distance<=(8*tiles_size)){
-        clyde_scatter_alg(g);
+        scatter_alg(g);
     }
 }
 
-void blinky_scatter_alg(ghost *g){
+void scatter_alg(ghost *g){
     
     Vector2 scatter_row_pix=pixel((tile){g->scatter_row,g->scatter_col});
     
@@ -379,43 +382,16 @@ void blinky_scatter_alg(ghost *g){
 
 }
 
-Vector2 pac_speed;
-
-void pinky_scatter_alg(ghost *g){
-    
-    Vector2 scatter_row_pix=pixel((tile){g->scatter_row,g->scatter_col});
-    
-
-    blinky_chase_alg(g,scatter_row_pix);
 
 
-}
-    
-void inky_scatter_alg(ghost *g){
-    
-    Vector2 scatter_row_pix=pixel((tile){g->scatter_row,g->scatter_col});
-
-    blinky_chase_alg(g,scatter_row_pix);
-
-}
-
-void clyde_scatter_alg(ghost *g){
-    
-    Vector2 scatter_row_pix=pixel((tile){g->scatter_row,g->scatter_col});
-
-    blinky_chase_alg(g,scatter_row_pix);
-
-}
-
-float speed;
-
-
+//ghost er movement koranor jonno
 void movement(ghost *g,float speed, Sound portal, bool is_sound_on){
     tile current = tiles_no(g->position);
     Vector2 aligned = pixel(current);
 
     Vector2 next = g->position;
     
+    //check kore next tiles e wall ache kina
     if(g->dir == up)
         next.y -= speed*dt;
     else if(g->dir == down) 
@@ -426,6 +402,8 @@ void movement(ghost *g,float speed, Sound portal, bool is_sound_on){
          next.x -= speed*dt;
 
     Vector2 lead = next;
+
+    //dan e gele top right r niche gele down left corner diye check ora hoy nahole wall er vitor dhuke jete pare
     if(g->dir == right) 
         lead.x += 23;
     else if(g->dir == down) 
@@ -434,8 +412,10 @@ void movement(ghost *g,float speed, Sound portal, bool is_sound_on){
     tile next_tile = tiles_no(lead);
 
     if(!wall(next_tile)){
+        //next e wall na thakle tahole next frame position e jay
         g->position = next;              
     } else {
+        //nahole age jekhane silo oikhanei aligned hoye jay
         g->position = aligned;           
     }        
     
@@ -457,7 +437,7 @@ void movement(ghost *g,float speed, Sound portal, bool is_sound_on){
 }
 
 
-
+//ghost er direction flip kore
 void flip_dir(ghost *g){
 
     if(g->dir==up){
@@ -482,6 +462,7 @@ void ghost_frightened(ghost *g){
     
     direction candidates[4] = { up, down, right, left };
     direction reverse = g->dir;
+    
     if (reverse == up)
         reverse = down;
     else if (reverse == down)
@@ -503,13 +484,17 @@ void ghost_frightened(ghost *g){
         else
             --next.col;
 
+        //ekhane check hoy next e wall ache kina r jate reverse dike na jay
+
         if (!wall(next) && candidate != reverse)
             choices[count++] = candidate;
     }
 
+    //jodi dead end e chole jay tokhon reverse chara upay nai
     if (count == 0) {
         g->dir = reverse; 
     } else {
+        //echara randomly choice hoy eikhane kondike jabe
         g->dir = choices[rand() % count];
     }
     g->color=BLUE;
@@ -523,10 +508,14 @@ static void choose_eaten_direction(ghost *g, tile home) {
     
     
     direction reverse = g->dir;
-    if (reverse == up) reverse = down;
-    else if (reverse == down) reverse = up;
-    else if (reverse == right) reverse = left;
-    else reverse = right;
+    if (reverse == up)
+        reverse = down;
+    else if (reverse == down) 
+        reverse = up;
+    else if (reverse == right) 
+        reverse = left;
+    else 
+        reverse = right;
 
     float best_distance = INFINITY;
     direction best_dir = reverse;
@@ -534,13 +523,18 @@ static void choose_eaten_direction(ghost *g, tile home) {
 
     for (int i = 0; i < 4; ++i) {
         
-        if (candidates[i] == reverse) continue;
+        if (candidates[i] == reverse) 
+        continue;
 
         tile next = current;
-        if (candidates[i] == up)         --next.row;
-        else if (candidates[i] == down)  ++next.row;
-        else if (candidates[i] == right) ++next.col;
-        else                             --next.col;
+        if (candidates[i] == up)         
+            --next.row;
+        else if (candidates[i] == down)
+            ++next.row;
+        else if (candidates[i] == right) 
+            ++next.col;
+        else                             
+            --next.col;
 
         if (!wall(next)) {
             float distance = Vector2Distance(pixel(next), pixel(home));

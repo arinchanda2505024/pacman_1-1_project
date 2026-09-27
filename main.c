@@ -150,6 +150,9 @@ int main(){
     Texture clyde_rules = LoadTexture("assets\\ghost_sprite\\clyde_right_1.png");
     Texture menu_background = LoadTexture("assets\\Designer.png");
     Texture other_menu_background = LoadTexture("assets\\pacman_menu_background.png");
+    Texture tex_c, tex_s, tex_a, tex_t, tex_v, tex_u;
+    Texture tex_w, tex_g, tex_r, tex_f, tex_l, tex_p;
+    Texture tutorial = LoadTexture("assets\\pac_sprite\\pac_man_right_2.png");
 
     while (!WindowShouldClose() && !start_game) {
         BeginDrawing();
@@ -180,7 +183,7 @@ int main(){
             if (menu_button((Rectangle){ 760, 545, 380, menu_text_size }, "Game Rules",20,menu_hover_sound,menu_click_sound,is_sound_on,113)){
                 menu_screen = menu_rules;
             }
-            if (menu_button((Rectangle){ 760, 620, 380, menu_text_size }, "About Us",3,menu_hover_sound,menu_click_sound,is_sound_on,125)){
+            if (menu_button((Rectangle){ 760, 620, 380, menu_text_size }, "Credit",3,menu_hover_sound,menu_click_sound,is_sound_on,148)){
                 menu_screen = menu_about;
             }
             if (menu_button((Rectangle){ 760, 695, 380, menu_text_size }, "Quit",4,menu_hover_sound,menu_click_sound,is_sound_on,160)){
@@ -237,20 +240,20 @@ int main(){
                 start_game = true;
             }
             if (menu_button((Rectangle){ 760, 560, 380, menu_text_size }, "Back",8,menu_hover_sound,menu_click_sound,is_sound_on,160)){
-                menu_screen = menu_main;
+                menu_screen = menu_name_input;
             }
         }
-        else if (menu_screen ==menu_leaderboard) {
+        else if (menu_screen ==menu_leaderboard){
             DrawTexture(other_menu_background,0,0,WHITE);
             DrawText("PACMAN", 820, 100, 64, YELLOW);
             DrawText("Leaderboard", 822, 185, 40, YELLOW);
-            if (menu_button((Rectangle){ 590, 255, 210, 55 }, "Easy",9,menu_hover_sound,menu_click_sound,is_sound_on,63)) {
+            if (menu_button((Rectangle){ 590, 255, 210, 55 }, "Easy",9,menu_hover_sound,menu_click_sound,is_sound_on,63)){
                 leaderboard_difficulty = 0;
             }
-            if (menu_button((Rectangle){ 845, 255, 210, 55 }, "Normal",10,menu_hover_sound,menu_click_sound,is_sound_on,60)) {
+            if (menu_button((Rectangle){ 845, 255, 210, 55 }, "Normal",10,menu_hover_sound,menu_click_sound,is_sound_on,60)){
                 leaderboard_difficulty = 1;
             }
-            if (menu_button((Rectangle){ 1100, 255, 210, 55 }, "Hard",11,menu_hover_sound,menu_click_sound,is_sound_on,66)) {
+            if (menu_button((Rectangle){ 1100, 255, 210, 55 }, "Hard",11,menu_hover_sound,menu_click_sound,is_sound_on,66)){
                 leaderboard_difficulty = 2;
             }
 
@@ -315,11 +318,13 @@ int main(){
             "-Avoid ghosts unless they are frightened.\n\n"
             "-You can eat ghosts during their frightened phase.\n\n"
             "-Power pellets make ghosts frightened for a short time.\n\n"
-            "-Use arrow keys or W A S D to move.\n\n";
+            "-Use arrow keys or W A S D to move.\n\n"
+            "-Press Esc to pause the game.";
 
             
             DrawText(rule_text, 640, 290, text_size, RAYWHITE);
-            if (menu_button((Rectangle){ 760, 670, 380, menu_text_size }, "Back",13,menu_hover_sound,menu_click_sound,is_sound_on,160)) {
+            DrawTexture(tutorial, 640, 650, WHITE);
+            if (menu_button((Rectangle){ 760, 700, 380, menu_text_size }, "Back",13,menu_hover_sound,menu_click_sound,is_sound_on,160)) {
                 menu_screen = menu_rules;
             }
         }
@@ -373,19 +378,21 @@ int main(){
         }
         else if (menu_screen == menu_about) {
             DrawTexture(other_menu_background,0,0,WHITE);
-            DrawText("PACMAN", 820, 100, 64, YELLOW);
-            DrawText("About Us", 860, 220, 40, YELLOW);
+            DrawText("PACMAN", 820, 100, 64, YELLOW); 
+            DrawText("Credit", 860, 220, 40, YELLOW);
             
             const char *about_text =
                 "We are presenting our Level-1/Term-1 (L1T1) group project. We have recreated one of the most popular\n\n"
-                "and OG game from 1980 till now using raylib functions. Presenting you the PACMAN! The game was developed \n\n"
-                "by Arin Kumar Chanda and Ahmed Muhaymin under the supervision of our respectful Dr. Ch. Md. Rakin Haider\n\n"
-                "Sir. We have added some exciting new maps and challenges. Let's see who can avoid those unpredictable\n\n"
-                "ghosts and complete the maps fast with highest points.Hope you will enjoy the game.\n\n\n\n"
+                "and OG game from 1980 till now using raylib functions. Presenting you the PACMAN! This game was first developed by\n\n"
+                "under the Toru Iwatani, a Japanese game designer. The game was remade by Arin Kumar Chanda and Ahmed Muhaymin\n\n"
+                "supervision of our respectful Dr. Ch. Md. Rakin Haider Sir. We have added some exciting new maps and challenges.\n\n"
+                "We have gathered different sprite from 'www.pinterest.com'. Besides we have gathered different audio from\n\n"
+                "'www.pixabay.com'. Let's see who can avoid those unpredictable ghosts and complete the maps fast with highestn\n\n"
+                "points.Hope you will enjoy the game.\n\n\n"
                 "Thank you!\n";
                 //His supervision and guidance helped us to develop the game properly. 
 
-            DrawText(about_text, 190, 300, text_size, RAYWHITE);
+            DrawText(about_text, 190, 300, text_size-2, RAYWHITE);
             
             if (menu_button((Rectangle){ 760, 830, 380, menu_text_size }, "Back",14,menu_hover_sound,menu_click_sound,is_sound_on,160)) {
                 menu_screen = menu_main;
@@ -408,7 +415,8 @@ int main(){
 
     if (selected_difficulty == 0) {
         map_file = "map_easy.txt";
-    } else if (selected_difficulty == 2) {
+    }
+    else if (selected_difficulty == 2) {
         map_file = "map_hard.txt";
     }
 
@@ -439,10 +447,10 @@ int main(){
     int minute=0,second=0;
     
     float timer_accumulator = 0.0f;
-    int score=0;
+    int score = 0;
     int wall_position_x[28];
     int wall_position_y[31];
-    int life=3;
+    int life = LIFE;
     int dot_count=0;
     float ghost_speed_multiplier;
     if(selected_difficulty == 0){
@@ -463,7 +471,7 @@ int main(){
     here:
     Vector2 position={976, 670};
     Vector2 speed = {0,0};
-    Vector2 nextSpeed = {0, 0};
+    Vector2 nextSpeed = {-main_speed, 0};
     float scattered_time=0.0f;
     float chase_time=0.0f;
     float frightened_time=0.0f;
@@ -478,8 +486,7 @@ int main(){
     //f= bottom right double corner, l= bottom left double corner
     
     //wall sprite er jonno
-    Texture tex_c, tex_s, tex_a, tex_t, tex_v, tex_u;
-    Texture tex_w, tex_g, tex_r, tex_f, tex_l, tex_p;
+    
 
     const char *wall_folder;
 
@@ -532,6 +539,7 @@ int main(){
     Texture eaten_ghost_left = LoadTexture("assets\\ghost_eaten\\eaten_left.png");
     Texture portal_left[24];
     Texture portal_right[24];
+    Texture2D life_sprite=LoadTexture("assets\\sprite\\life_sprite.png");
     
 
     for(int i=0; i<24; i++){
@@ -633,7 +641,7 @@ int main(){
         }
 
 
-        if(!paused){
+        if(!paused && !over && !level_complete){
             
             //pacman er movement:
             if(IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)){
@@ -659,7 +667,7 @@ int main(){
             float snap_tolerance = main_speed * dt + 0.01f;
             bool at_turn_line = !perpendicular_turn || (moving_horizontally ? near_tile_line(position.x, map_x_float, snap_tolerance) : near_tile_line(position.y, map_y_float, snap_tolerance));
                                     
-            if (at_turn_line) {
+            if (at_turn_line){
                 Vector2 turn_position = position;
 
                 if (perpendicular_turn) {
@@ -782,7 +790,7 @@ int main(){
             
             
             
-            if(!over && !level_complete){
+            
                 if(phase == scattered){
                     if(scattered_time<10.0f){
                         
@@ -798,20 +806,20 @@ int main(){
 
                         if (fabsf(blinky_ghost.position.x - blinky_tile_position.x) < 1.0f && fabsf(blinky_ghost.position.y - blinky_tile_position.y) < 1.0f) 
                         {
-                            blinky_scatter_alg(&blinky_ghost);
+                            scatter_alg(&blinky_ghost);
                         }
                         if (fabsf(pinky_ghost.position.x - pinky_tile_position.x) < 1.0f && fabsf(pinky_ghost.position.y - pinky_tile_position.y) < 1.0f)  
                         {
-                            pinky_scatter_alg(&pinky_ghost);
+                            scatter_alg(&pinky_ghost);
                         }
 
                         if (fabsf(inky_ghost.position.x - inky_tile_position.x) < 1.0f && fabsf(inky_ghost.position.y - inky_tile_position.y) < 1.0f)  
                         {
-                            inky_scatter_alg(&inky_ghost);
+                            scatter_alg(&inky_ghost);
                         }
                         if (fabsf(clyde_ghost.position.x - clyde_tile_position.x) < 1.0f && fabsf(clyde_ghost.position.y - clyde_tile_position.y) < 1.0f)  
                         {
-                            clyde_scatter_alg(&clyde_ghost);
+                            scatter_alg(&clyde_ghost);
                         }
                             
                         
@@ -1045,9 +1053,7 @@ int main(){
                     Vector2 tile_pos = pixel(t);
 
                     bool at_tile =fabsf(inky_ghost.position.x - tile_pos.x) < 1.5f && fabsf(inky_ghost.position.y - tile_pos.y) < 1.5f;
-                        
-                        
-
+                    
                     if (at_tile) {
                         inky_ghost.position = tile_pos;
                         eaten_phase_inky(&inky_ghost);
@@ -1086,7 +1092,7 @@ int main(){
                     movement(&clyde_ghost, ghost_normal_speed * ghost_speed_multiplier, portal,is_sound_on);
                         
                 }
-            }
+            
         }
 
         
@@ -1168,8 +1174,8 @@ int main(){
     /*DrawTexture(portal_left,map_x-tile_size,map_y+tile_size*14-5,WHITE);
     DrawTexture(portal_right,map_x+wtiles*(tile_size),map_y+tile_size*14-5,WHITE);*/
                 
-    DrawTexture(portal_left[portal_frame], map_x-tile_size-20, -10+map_y+tile_size*14-5,WHITE);
-    DrawTexture(portal_right[portal_frame],map_x+wtiles*(tile_size)-20, -10+map_y+tile_size*14-5,WHITE);
+    DrawTexture(portal_right[portal_frame], map_x-tile_size-20, -10+map_y+tile_size*14-5,WHITE);
+    DrawTexture(portal_left[portal_frame],map_x+wtiles*(tile_size)-20, -10+map_y+tile_size*14-5,WHITE);
 
     if(phase == scattered){
         DrawText("Phase : ", 860, 30, 30, WHITE);
@@ -1300,7 +1306,7 @@ int main(){
         
         DrawText(TextFormat("SCORE: %d", score), 586, 30, game_screen_text, WHITE);
         DrawText("LIFE:",600,895,game_screen_text,WHITE);
-        Texture2D life_sprite=LoadTexture("assets\\sprite\\life_sprite.png");
+        
 
 
         
@@ -1509,6 +1515,7 @@ int main(){
    UnloadTexture(clyde_rules);
 
    UnloadTexture(menu_background);
+   UnloadTexture(life_sprite);
     
     for(int i = 0; i < 2; i++){
         UnloadTexture(blinky_up[i]);
