@@ -84,15 +84,15 @@ bool wall(tile t){
 
 tile tiles_no(Vector2 position){
     tile t;
-    t.col=(position.x-ghost_map_x)/26;
-    t.row=(position.y-ghost_map_y)/26;
+    t.col=(position.x-ghost_map_x)/tiles_size;
+    t.row=(position.y-ghost_map_y)/tiles_size;
     return t;
 }
 
 Vector2 pixel(tile t){
     Vector2 p;
-    p.x=ghost_map_x+26*t.col+1;
-    p.y=ghost_map_y+26*t.row+1;
+    p.x=ghost_map_x+ tiles_size*t.col+1;
+    p.y=ghost_map_y + tiles_size*t.row+1;
     return p;
 }
 
@@ -314,13 +314,13 @@ void blinky_chase_alg(ghost *g,Vector2 pacpos){
 void pinky_chase_alg(ghost *g,Vector2 pacpos,Vector2 speed){
     Vector2 target=pacpos;
     if(speed.x>0)
-        target.x+=4*26;
+        target.x += 4*tiles_size;
     else if(speed.x<0)
-        target.x-=4*26;
+        target.x-= 4*tiles_size;
     else if(speed.y>0)
-        target.y+=4*26;
+        target.y+=4*tiles_size;
     else if(speed.y<0){
-        target.y-=4*26;
+        target.y-=4*tiles_size;
     }
     tile t=tiles_no(g->position);
     bool w = wall(t);
@@ -335,13 +335,13 @@ void inky_chase_alg(ghost *g,ghost *g1,Vector2 pacpos, Vector2 speed){
     Vector2 target=pacpos;
     Vector2 new_target;
     if(speed.x>0)
-    target.x+=2*26;
+    target.x+=2*tiles_size;
     else if(speed.x<0)
-    target.x-=2*26;
+    target.x-=2*tiles_size;
     else if(speed.y>0)
-    target.y+=2*26;
+    target.y+=2*tiles_size;
     else if(speed.y<0){
-    target.y-=2*26;
+    target.y-=2*tiles_size;
     }
     tile t=tiles_no(g->position);
     
@@ -361,10 +361,10 @@ void inky_chase_alg(ghost *g,ghost *g1,Vector2 pacpos, Vector2 speed){
 void clyde_chase_alg(ghost *g,Vector2 pacpos){
 
     float distance=Vector2Distance(g->position,pacpos);
-    if(distance>(8*26)){
+    if(distance>(8*tiles_size)){
         blinky_chase_alg(g,pacpos);
     }
-    else if(distance<=(8*26)){
+    else if(distance<=(8*tiles_size)){
         clyde_scatter_alg(g);
     }
 }
@@ -410,7 +410,7 @@ void clyde_scatter_alg(ghost *g){
 float speed;
 
 
-void movement(ghost *g,float speed){
+void movement(ghost *g,float speed, Sound portal, bool is_sound_on){
     tile current = tiles_no(g->position);
     Vector2 aligned = pixel(current);
 
@@ -443,10 +443,15 @@ void movement(ghost *g,float speed){
     if (current.row == 14) {
         if (g->position.x < 564) {
             g->position.x = pixel((tile){ 14, 27 }).x;
+            if(is_sound_on)
+            PlaySound(portal);
         }
         else if (g->position.x > 1314) {
             g->position.x = pixel((tile){ 14, 0 }).x;
+            if(is_sound_on)
+            PlaySound(portal);
         }
+        
     }
     
 }
@@ -611,7 +616,7 @@ void draw_eaten_ghost_sprite(Texture sprite_up,Texture sprite_down, Texture spri
 }
 
 Rectangle g_rec(ghost *g, ghost_name name){
-    return (Rectangle){g->position.x,g->position.y,24,24};
+    return (Rectangle){g->position.x,g->position.y,ghost_size,ghost_size};
 }
 
 

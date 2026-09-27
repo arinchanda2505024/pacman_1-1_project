@@ -7,7 +7,7 @@
 #define ghost_map_x 586
 #define ghost_map_y 72
 #define ghost_size 24
-
+#define tiles_size 26
 #define wtiles 28
 #define htiles 31
 #define ghost_normal_speed 110.0f
@@ -83,7 +83,7 @@ tile tiles_no(Vector2 position);
 char check_distance(ghost *g, bool wall);
 void blinky_chase_alg(ghost *g,Vector2 pacpos);
 void blinky_scatter_alg(ghost *g);
-void movement(ghost *g,float speed);
+void movement(ghost *g,float speed, Sound portal, bool is_sound_on);
 void ghost_frightened(ghost *g);
 void flip_dir(ghost *g);
 void eaten_phase_blinky(ghost *g);
