@@ -319,12 +319,14 @@ int main(){
             "-You can eat ghosts during their frightened phase.\n\n"
             "-Power pellets make ghosts frightened for a short time.\n\n"
             "-Use arrow keys or W A S D to move.\n\n"
-            "-Press Esc to pause the game.";
+            "-Press Esc to pause the game.\n\n";
+            
 
             
             DrawText(rule_text, 640, 290, text_size, RAYWHITE);
-            DrawTexture(tutorial, 640, 650, WHITE);
-            if (menu_button((Rectangle){ 760, 700, 380, menu_text_size }, "Back",13,menu_hover_sound,menu_click_sound,is_sound_on,160)) {
+            
+            
+            if (menu_button((Rectangle){ 760, 750, 380, menu_text_size }, "Back",13,menu_hover_sound,menu_click_sound,is_sound_on,160)) {
                 menu_screen = menu_rules;
             }
         }
@@ -379,7 +381,7 @@ int main(){
         else if (menu_screen == menu_about) {
             DrawTexture(other_menu_background,0,0,WHITE);
             DrawText("PACMAN", 820, 100, 64, YELLOW); 
-            DrawText("Credit", 860, 220, 40, YELLOW);
+            DrawText("Credit", 880, 220, 40, YELLOW);
             
             const char *about_text =
                 "We are presenting our Level-1/Term-1 (L1T1) group project. We have recreated one of the most popular\n\n"
@@ -1516,6 +1518,7 @@ int main(){
 
    UnloadTexture(menu_background);
    UnloadTexture(life_sprite);
+   UnloadTexture(tutorial);
     
     for(int i = 0; i < 2; i++){
         UnloadTexture(blinky_up[i]);
