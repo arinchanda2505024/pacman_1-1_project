@@ -759,13 +759,13 @@ int main(){
 
             
         if(tile_i == 14){
-                if(position.x < 564){
-                    position.x = 1288;
+                if(position.x < 570){
+                    position.x = 1305;
                     if(is_sound_on)
                     PlaySound(portal);
                 }
-                else if(position.x > 1288){
-                    position.x = 564;
+                else if(position.x > 1305){
+                    position.x = 570;
                     if(is_sound_on)
                     PlaySound(portal);
                 }
@@ -1177,7 +1177,7 @@ int main(){
     DrawTexture(portal_right,map_x+wtiles*(tile_size),map_y+tile_size*14-5,WHITE);*/
                 
     DrawTexture(portal_right[portal_frame], map_x-tile_size-20, -10+map_y+tile_size*14-5,WHITE);
-    DrawTexture(portal_left[portal_frame],map_x+wtiles*(tile_size)-20, -10+map_y+tile_size*14-5,WHITE);
+    DrawTexture(portal_left[portal_frame],map_x+wtiles*(tile_size)-16, -10+map_y+tile_size*14-5,WHITE);
 
     if(phase == scattered){
         DrawText("Phase : ", 860, 30, 30, WHITE);
