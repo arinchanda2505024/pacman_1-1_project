@@ -16,3 +16,4 @@
 #define pac_ghost_size_float 24.0f
 #define pac_start_x 976
 #define pac_start_y 670
+#define LIFE 3
