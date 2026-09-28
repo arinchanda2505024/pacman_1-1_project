@@ -293,13 +293,17 @@ int main(){
             if (menu_button((Rectangle){ 760, 300, 380, menu_text_size }, "General",23,menu_hover_sound,menu_click_sound,is_sound_on,143)){
                 menu_screen = menu_control;
             }
-            if (menu_button((Rectangle){ 760, 380, 380, menu_text_size }, "Ghost",24,menu_hover_sound,menu_click_sound,is_sound_on,150)){
+            if (menu_button((Rectangle){ 760, 380, 380, menu_text_size }, "Ghost",24,menu_hover_sound,menu_click_sound,is_sound_on,151)){
                 menu_screen = menu_ghost;
             }
-            if (menu_button((Rectangle){ 760, 460, 380, menu_text_size }, "Phase",25,menu_hover_sound,menu_click_sound,is_sound_on,150)){
+            if (menu_button((Rectangle){ 760, 460, 380, menu_text_size }, "Phase",25,menu_hover_sound,menu_click_sound,is_sound_on,151)){
                 menu_screen = menu_phase;
             }
-            if (menu_button((Rectangle){ 760, 560, 380, menu_text_size }, "Back",26,menu_hover_sound,menu_click_sound,is_sound_on,160)){
+            if (menu_button((Rectangle){ 760, 540, 380, menu_text_size }, "Scoring",25,menu_hover_sound,menu_click_sound,is_sound_on,143)){
+                menu_screen = menu_score;
+            }
+            
+            if (menu_button((Rectangle){ 760, 640, 380, menu_text_size }, "Back",26,menu_hover_sound,menu_click_sound,is_sound_on,160)){
                 menu_screen = menu_main;
             }
             
@@ -378,6 +382,14 @@ int main(){
                 menu_screen = menu_rules;
             }
         }
+        else if(menu_screen == menu_score){
+            DrawText("-Eating normal pellets gives you 10 points", 410, 290, text_size, WHITE);
+            DrawText("-Eating power pellets gives you 50 points and ghosts go to frightened phase", 410, 390, text_size, WHITE);
+            DrawText("-Eating ghosts during frightened phase gives you 200 points", 410, 490, text_size, WHITE);
+            if (menu_button((Rectangle){ 760, 700, 380, menu_text_size }, "Back",13,menu_hover_sound,menu_click_sound,is_sound_on,160)) {
+                menu_screen = menu_rules;
+            }
+        }
         else if (menu_screen == menu_about) {
             DrawTexture(other_menu_background,0,0,WHITE);
             DrawText("PACMAN", 820, 100, 64, YELLOW); 
@@ -389,7 +401,7 @@ int main(){
                 "under the Toru Iwatani, a Japanese game designer. The game was remade by Arin Kumar Chanda and Ahmed Muhaymin\n\n"
                 "supervision of our respectful Dr. Ch. Md. Rakin Haider Sir. We have added some exciting new maps and challenges.\n\n"
                 "We have gathered different sprite from 'www.pinterest.com'. Besides we have gathered different audio from\n\n"
-                "'www.pixabay.com'. Let's see who can avoid those unpredictable ghosts and complete the maps fast with highestn\n\n"
+                "'www.pixabay.com'. Let's see who can avoid those unpredictable ghosts and complete the maps fast with highest\n\n"
                 "points.Hope you will enjoy the game.\n\n\n"
                 "Thank you!\n";
                 //His supervision and guidance helped us to develop the game properly. 
@@ -440,9 +452,9 @@ int main(){
     SetSoundVolume(dot_sound, 0.1f);
     SetSoundVolume(big_dot_sound, 0.5f);
     SetSoundVolume(ghost_eaten_sound, 0.5f);
-    SetSoundVolume(pac_eaten_sound, 0.7f);
+    SetSoundVolume(pac_eaten_sound, 0.9f);
     SetSoundVolume(game_over_sound,0.5f);
-    SetSoundVolume(portal,0.3f);
+    SetSoundVolume(portal,0.4f);
 
 
 
@@ -473,7 +485,7 @@ int main(){
     here:
     Vector2 position={976, 670};
     Vector2 speed = {0,0};
-    Vector2 nextSpeed = {-main_speed, 0};
+    Vector2 nextSpeed = {0, 0};
     float scattered_time=0.0f;
     float chase_time=0.0f;
     float frightened_time=0.0f;
@@ -1181,7 +1193,7 @@ int main(){
 
     if(phase == scattered){
         DrawText("Phase : ", 860, 30, 30, WHITE);
-        DrawText("Scattered", 980,30, 30, BLUE);
+        DrawText("Scattered", 980,30, 30, SKYBLUE);
     }
     if(phase == chase){
         DrawText("Phase : ", 860, 30, 30, WHITE);
