@@ -383,6 +383,8 @@ int main(){
             }
         }
         else if(menu_screen == menu_score){
+            DrawTexture(other_menu_background,0,0,WHITE);
+            DrawText("PACMAN", 820, 100, 64, YELLOW);
             DrawText("-Eating normal pellets gives you 10 points", 410, 290, text_size, WHITE);
             DrawText("-Eating power pellets gives you 50 points and ghosts go to frightened phase", 410, 390, text_size, WHITE);
             DrawText("-Eating ghosts during frightened phase gives you 200 points", 410, 490, text_size, WHITE);
