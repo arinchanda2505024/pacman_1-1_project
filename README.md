@@ -51,9 +51,9 @@ Linux:
 
 Windows:
 
-  gcc -g main.c ghost.c collision.c menu.c -Iraylib/raylib-6.0_win64_mingw-w64/include raylib/raylib-6.0_win64_mingw-w64/lib/libraylib.a -lopengl32 -lgdi32 -lwinmm -Wl,--defsym,_stat64=_stat64i32 -o Pacman
+  gcc -g main.c ghost.c collision.c menu.c -I "raylib/raylib-6.0_win64_mingw-w64/include" raylib/raylib-6.0_win64_mingw-w64/lib/libraylib.a -lopengl32 -lgdi32 -lwinmm "-Wl,--defsym,_stat64=_stat64i32" -o Pacman
 
-  Pacman.exe
+  ./Pacman
 
 Mac:
 
