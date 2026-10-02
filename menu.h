@@ -17,7 +17,8 @@ typedef enum {
     menu_sound,
     menu_control,
     menu_ghost,
-    menu_phase
+    menu_phase,
+    menu_score
 } MenuScreen;
 
 typedef struct {

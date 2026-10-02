@@ -37,31 +37,32 @@ static bool IsValidDifficulty(int difficulty)
     return difficulty >= 0 && difficulty < DIFFICULTY_COUNT;
 }
 
-/* Keep only the best ten records for each difficulty. */
+
 static void TrimLeaderboard(LeaderboardEntry entries[], int *count)
 {
     LeaderboardEntry kept[MAX_LEADERBOARD_ENTRIES];
     int kept_per_difficulty[DIFFICULTY_COUNT] = { 0 };
     int kept_count = 0;
 
-    SortLeaderboard(entries, *count);
+    SortLeaderboard(entries, *count);  //best score gula sorting kore boro theke choto sajano hoy
 
     for (int i = 0; i < *count; i++) {
         int difficulty = entries[i].difficulty;
         if (IsValidDifficulty(difficulty) && kept_per_difficulty[difficulty] < MAX_LEADERBOARD_ENTRIES_PER_DIFFICULTY){
             
-            kept[kept_count++] = entries[i];
-            kept_per_difficulty[difficulty]++;
+            kept[kept_count++] = entries[i];   //ei array te sob entries joma thake (per difficulty 10 limit er moddhe)
+            kept_per_difficulty[difficulty]++;  //per difficulty te scoring er counting baray
         }
     }
 
     memcpy(entries, kept, sizeof(LeaderboardEntry) * kept_count);
     *count = kept_count;
-    SortLeaderboard(entries, *count);
+    //SortLeaderboard(entries, *count);
 }
 
 static void InsertLeaderboardEntry(LeaderboardEntry entries[], int *count, LeaderboardEntry entry){
-    if (!IsValidDifficulty(entry.difficulty)) return;
+    if (!IsValidDifficulty(entry.difficulty)) 
+    return;
 
     if (*count < MAX_LEADERBOARD_ENTRIES) {
         entries[(*count)++] = entry;
@@ -69,10 +70,12 @@ static void InsertLeaderboardEntry(LeaderboardEntry entries[], int *count, Leade
         return;
     }
 
-    /* The board is full: replace only the weakest entry in this difficulty. */
+    //jodi leaderboard e max entry er soman or beshi hoye jay tahole eituk execute hbe
+    
     int worst = -1;
     for (int i = 0; i < *count; i++) {
-        if (entries[i].difficulty != entry.difficulty) continue;
+        if (entries[i].difficulty != entry.difficulty) 
+        continue;
         if (worst == -1 || entries[i].score < entries[worst].score || (entries[i].score == entries[worst].score && entries[i].seconds > entries[worst].seconds)){
              
             worst = i;

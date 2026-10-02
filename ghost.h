@@ -82,20 +82,20 @@ bool wall(tile t);
 tile tiles_no(Vector2 position);
 char check_distance(ghost *g, bool wall);
 void blinky_chase_alg(ghost *g,Vector2 pacpos);
-void blinky_scatter_alg(ghost *g);
+void scatter_alg(ghost *g);
 void movement(ghost *g,float speed, Sound portal, bool is_sound_on);
 void ghost_frightened(ghost *g);
 void flip_dir(ghost *g);
 void eaten_phase_blinky(ghost *g);
-void pinky_scatter_alg(ghost *g);
+
 void pinky_chase_alg(ghost *g,Vector2 pacpos,Vector2 speed);
 void eaten_phase_pinky(ghost *g);
 void inky_chase_alg(ghost *g,ghost *g1,Vector2 pacpos, Vector2 speed);
-void inky_scatter_alg(ghost *g);
+
 void eaten_phase_inky(ghost *g);
 void clyde_chase_alg(ghost *g,Vector2 pacpos);
 void eaten_phase_clyde(ghost *g);
-void clyde_scatter_alg(ghost *g);
+
 void check_eaten_reset(ghost *g, tile home);
 void draw_eaten_ghost_sprite(Texture sprite_up,Texture sprite_down, Texture sprite_right, Texture sprite_left,ghost g);
 void draw_ghost_sprite(Texture *g_sprite, ghost g, int frame);
