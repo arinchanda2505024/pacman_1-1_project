@@ -88,7 +88,7 @@ int main(){
     bool after_intro = false;
     
 
-    const char *background_path = "assets\\sprite\\pacman_intro.png";
+    const char *background_path = "assets/sprite/pacman_intro.png";
     Image background_image = LoadImage(background_path);
     Texture2D background = { 0 };
 
@@ -100,11 +100,11 @@ int main(){
         TraceLog(LOG_ERROR, "Could not load background image: %s", background_path);
     }
 
-    Sound menu_hover_sound = LoadSound("assets\\audio\\tunetank.com_menu-hover-click.wav");
+    Sound menu_hover_sound = LoadSound("assets/audio/tunetank.com_menu-hover-click.wav");
     SetSoundVolume(menu_hover_sound, 0.35f);
-    Sound menu_click_sound = LoadSound("assets\\audio\\freesound_community-menu-selection-102220.mp3");
+    Sound menu_click_sound = LoadSound("assets/audio/freesound_community-menu-selection-102220.mp3");
     
-    Sound start_sound = LoadSound("assets\\audio\\02. Start Music.mp3");
+    Sound start_sound = LoadSound("assets/audio/02. Start Music.mp3");
     PlaySound(start_sound);
 
     while(!WindowShouldClose() && !after_intro){
@@ -144,15 +144,15 @@ int main(){
     
 
     
-    Texture blinky_rules = LoadTexture("assets\\ghost_sprite\\blinky_right_1.png");
-    Texture pinky_rules = LoadTexture("assets\\ghost_sprite\\pinky_right_1.png");
-    Texture inky_rules = LoadTexture("assets\\ghost_sprite\\inky_right_1.png");
-    Texture clyde_rules = LoadTexture("assets\\ghost_sprite\\clyde_right_1.png");
-    Texture menu_background = LoadTexture("assets\\Designer.png");
-    Texture other_menu_background = LoadTexture("assets\\pacman_menu_background.png");
+    Texture blinky_rules = LoadTexture("assets/ghost_sprite/blinky_right_1.png");
+    Texture pinky_rules = LoadTexture("assets/ghost_sprite/pinky_right_1.png");
+    Texture inky_rules = LoadTexture("assets/ghost_sprite/inky_right_1.png");
+    Texture clyde_rules = LoadTexture("assets/ghost_sprite/clyde_right_1.png");
+    Texture menu_background = LoadTexture("assets/Designer.png");
+    Texture other_menu_background = LoadTexture("assets/pacman_menu_background.png");
     Texture tex_c, tex_s, tex_a, tex_t, tex_v, tex_u;
     Texture tex_w, tex_g, tex_r, tex_f, tex_l, tex_p;
-    Texture tutorial = LoadTexture("assets\\pac_sprite\\pac_man_right_2.png");
+    Texture tutorial = LoadTexture("assets/pac_sprite/pac_man_right_2.png");
 
     while (!WindowShouldClose() && !start_game) {
         BeginDrawing();
@@ -443,13 +443,13 @@ int main(){
         return 1;
     }
 
-    Sound dot_sound = LoadSound("assets\\audio\\freesound_community-carrotnom-92106.mp3");
-    Sound big_dot_sound= LoadSound("assets\\audio\\chomp-1.mp3");
-    Sound ghost_eaten_sound = LoadSound("assets\\audio\\universfield-power-punch-192118.mp3");
-    Sound pac_eaten_sound = LoadSound("assets\\audio\\muhahaha-made-with-Voicemod.mp3");  
-    Sound game_over_sound = LoadSound("assets\\audio\\cat-laughing-at-you-made-with-Voicemod.mp3");
-    Sound game_finish_sound = LoadSound("assets\\audio\\dragon-studio-wow-423653.mp3");
-    Sound portal = LoadSound("assets\\portal\\sci-fi-portal-open-swoop-1-00-01.mp3");
+    Sound dot_sound = LoadSound("assets/audio/freesound_community-carrotnom-92106.mp3");
+    Sound big_dot_sound= LoadSound("assets/audio/chomp-1.mp3");
+    Sound ghost_eaten_sound = LoadSound("assets/audio/universfield-power-punch-192118.mp3");
+    Sound pac_eaten_sound = LoadSound("assets/audio/muhahaha-made-with-Voicemod.mp3");  
+    Sound game_over_sound = LoadSound("assets/audio/cat-laughing-at-you-made-with-Voicemod.mp3");
+    Sound game_finish_sound = LoadSound("assets/audio/dragon-studio-wow-423653.mp3");
+    Sound portal = LoadSound("assets/portal/sci-fi-portal-open-swoop-1-00-01.mp3");
 
     SetSoundVolume(dot_sound, 0.1f);
     SetSoundVolume(big_dot_sound, 0.5f);
@@ -507,27 +507,27 @@ int main(){
     const char *wall_folder;
 
     if (selected_difficulty == 0) {
-        wall_folder = "assets\\sprite\\ez";
+        wall_folder = "assets/sprite/ez";
     }
     else if (selected_difficulty == 2) {
-        wall_folder = "assets\\sprite\\hard";
+        wall_folder = "assets/sprite/hard";
     }
     else {
-        wall_folder = "assets\\sprite";
+        wall_folder = "assets/sprite";
     }
 
-    tex_c = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_TL.png", wall_folder));
-    tex_s = LoadTexture(TextFormat("%s\\WALL_DOUBLE_H.png", wall_folder));
-    tex_a = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_TR.png", wall_folder));
-    tex_t = LoadTexture(TextFormat("%s\\WALL_DOUBLE_V.png", wall_folder));
-    tex_v = LoadTexture(TextFormat("%s\\WALL_SINGLE_V.png", wall_folder));
-    tex_u = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_TL.png", wall_folder));
-    tex_w = LoadTexture(TextFormat("%s\\WALL_SINGLE_H.png", wall_folder));
-    tex_g = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_TR.png", wall_folder));
-    tex_r = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_BR.png", wall_folder));
-    tex_f = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_BR.png", wall_folder));
-    tex_l = LoadTexture(TextFormat("%s\\WALL_DOUBLE_CORNER_BL.png", wall_folder));
-    tex_p = LoadTexture(TextFormat("%s\\WALL_SINGLE_CORNER_BL.png", wall_folder));
+    tex_c = LoadTexture(TextFormat("%s/WALL_DOUBLE_CORNER_TL.png", wall_folder));
+    tex_s = LoadTexture(TextFormat("%s/WALL_DOUBLE_H.png", wall_folder));
+    tex_a = LoadTexture(TextFormat("%s/WALL_DOUBLE_CORNER_TR.png", wall_folder));
+    tex_t = LoadTexture(TextFormat("%s/WALL_DOUBLE_V.png", wall_folder));
+    tex_v = LoadTexture(TextFormat("%s/WALL_SINGLE_V.png", wall_folder));
+    tex_u = LoadTexture(TextFormat("%s/WALL_SINGLE_CORNER_TL.png", wall_folder));
+    tex_w = LoadTexture(TextFormat("%s/WALL_SINGLE_H.png", wall_folder));
+    tex_g = LoadTexture(TextFormat("%s/WALL_SINGLE_CORNER_TR.png", wall_folder));
+    tex_r = LoadTexture(TextFormat("%s/WALL_SINGLE_CORNER_BR.png", wall_folder));
+    tex_f = LoadTexture(TextFormat("%s/WALL_DOUBLE_CORNER_BR.png", wall_folder));
+    tex_l = LoadTexture(TextFormat("%s/WALL_DOUBLE_CORNER_BL.png", wall_folder));
+    tex_p = LoadTexture(TextFormat("%s/WALL_SINGLE_CORNER_BL.png", wall_folder));
     Texture pac_sprite_up[3];
     Texture pac_sprite_down[3];
     Texture pac_sprite_right[3];
@@ -549,54 +549,54 @@ int main(){
     Texture inky_left[2];
     Texture clyde_left[2];
     Texture frightened_ghost[4];
-    Texture eaten_ghost_up = LoadTexture("assets\\ghost_eaten\\eaten_up.png");
-    Texture eaten_ghost_down = LoadTexture("assets\\ghost_eaten\\eaten_down.png");
-    Texture eaten_ghost_right = LoadTexture("assets\\ghost_eaten\\eaten_right.png");
-    Texture eaten_ghost_left = LoadTexture("assets\\ghost_eaten\\eaten_left.png");
+    Texture eaten_ghost_up = LoadTexture("assets/ghost_eaten/eaten_up.png");
+    Texture eaten_ghost_down = LoadTexture("assets/ghost_eaten/eaten_down.png");
+    Texture eaten_ghost_right = LoadTexture("assets/ghost_eaten/eaten_right.png");
+    Texture eaten_ghost_left = LoadTexture("assets/ghost_eaten/eaten_left.png");
     Texture portal_left[24];
     Texture portal_right[24];
-    Texture2D life_sprite=LoadTexture("assets\\sprite\\life_sprite.png");
+    Texture2D life_sprite=LoadTexture("assets/sprite/life_sprite.png");
     
 
     for(int i=0; i<24; i++){
         char path[100];
-        sprintf(path, "assets\\portal\\sprites_left_60\\portal_left_%d.png", i);
+        sprintf(path, "assets/portal/sprites_left_60/portal_left_%d.png", i);
         portal_left[i] = LoadTexture(path);
     }
     for(int i=0; i<24; i++){
         char path[100];
-        sprintf(path, "assets\\portal\\sprites_right_60\\portal_right_%d.png", i);
+        sprintf(path, "assets/portal/sprites_right_60/portal_right_%d.png", i);
         portal_right[i] = LoadTexture(path);
     }
 
     for(int i=0; i<3; i++){
         char path[100];
-        sprintf(path, "assets\\pac_sprite\\pac_man_up_%d.png", i+1);
+        sprintf(path, "assets/pac_sprite/pac_man_up_%d.png", i+1);
         pac_sprite_up[i] = LoadTexture(path);
     }
 
 
     for(int i=0; i<3; i++){
         char path[100];
-        sprintf(path, "assets\\pac_sprite\\pac_man_down_%d.png", i+1);
+        sprintf(path, "assets/pac_sprite/pac_man_down_%d.png", i+1);
         pac_sprite_down[i] = LoadTexture(path);
     }
 
     for(int i=0; i<3; i++){
         char path[100];
-        sprintf(path, "assets\\pac_sprite\\pac_man_right_%d.png", i+1);
+        sprintf(path, "assets/pac_sprite/pac_man_right_%d.png", i+1);
         pac_sprite_right[i] = LoadTexture(path);
     }
 
     for(int i=0; i<3; i++){
         char path[100];
-        sprintf(path, "assets\\pac_sprite\\pac_man_left_%d.png", i+1);
+        sprintf(path, "assets/pac_sprite/pac_man_left_%d.png", i+1);
         pac_sprite_left[i] = LoadTexture(path);
     }
 
     for(int i = 0; i < 4; i++){
         char path[100];
-        sprintf(path, "assets\\ghost_frightened\\frightened_%d.png", i+1);
+        sprintf(path, "assets/ghost_frightened/frightened_%d.png", i+1);
         frightened_ghost[i] = LoadTexture(path);
     }
 

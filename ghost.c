@@ -583,7 +583,7 @@ void check_eaten_reset(ghost *g, tile home) {
 void ghost_sprite(Texture *g_sprite,int n, char *address){
     for(int i=0; i<n; i++){
         char path[100];
-        sprintf(path, "assets\\ghost_sprite\\%s_%d.png", address,i+1);
+        sprintf(path, "assets/ghost_sprite/%s_%d.png", address,i+1);
         g_sprite[i] = LoadTexture(path);
     }
 }
